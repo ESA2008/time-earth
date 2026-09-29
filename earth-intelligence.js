@@ -3533,7 +3533,7 @@
 
             const response =
                 await fetch(
-                    NASA_AI_API,
+                    AI_API_URL,
                     {
                         method:
                             "POST",
@@ -3739,18 +3739,23 @@
 
     function initializeNASAIA() {
 
-        createAIStyles();
+    createAIStyles();
 
-        createAIButton();
+    createAIPanel();
 
-        /*
-         * Do not open the panel automatically.
-         * The user opens it with the button.
-         */
+    const existingButton =
+        document.getElementById("nasaAIButton");
 
-        updateAIContext();
-
+    if (existingButton) {
+        existingButton.addEventListener(
+            "click",
+            openNASAIA
+        );
     }
+
+    updateAIContext();
+
+}
 
 
     /*
