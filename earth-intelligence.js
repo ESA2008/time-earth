@@ -2090,7 +2090,7 @@
 
     "use strict";
 
-    const NASA_AI_API = "http://localhost:3000/api/nasa/ask";
+    const AI_API_URL = "https://time-earth-api.onrender.com/api/nasa/ask";
 
     let conversation = [];
 
