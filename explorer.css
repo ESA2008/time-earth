@@ -1,0 +1,5585 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    background: #07090c;
+    color: #ffffff;
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.topbar {
+    position: fixed;
+    z-index: 1000;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 64px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 22px;
+
+    background: rgba(5, 7, 10, 0.92);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(18px);
+}
+
+.top-left,
+.top-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.brand-mark {
+    width: 28px;
+    height: 28px;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+
+    font-size: 11px;
+}
+
+.icon-button {
+    width: 34px;
+    height: 34px;
+
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 50%;
+
+    background: rgba(255,255,255,0.05);
+    color: white;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.icon-button:hover {
+    background: rgba(255,255,255,0.12);
+}
+
+.location-header {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+
+    text-align: center;
+}
+
+.location-name {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+}
+
+.coordinates {
+    margin-top: 3px;
+
+    font-size: 9px;
+    color: rgba(255,255,255,0.45);
+}
+
+
+/* =========================================================
+   TIMELINE
+========================================================= */
+
+.timeline {
+    position: fixed;
+    z-index: 900;
+
+    top: 64px;
+    left: 0;
+    right: 0;
+
+    height: 108px;
+
+    padding: 15px 25px 14px;
+
+    background: rgba(8,10,14,0.96);
+
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(20px);
+}
+
+.timeline-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.timeline-label,
+.section-eyebrow {
+    font-size: 8px;
+    font-weight: 700;
+
+    letter-spacing: 1.8px;
+
+    color: rgba(255,255,255,0.42);
+}
+
+.timeline-date {
+    margin-top: 3px;
+
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.timeline-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.timeline-button,
+.small-button {
+    height: 28px;
+
+    padding: 0 12px;
+
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 5px;
+
+    background: rgba(255,255,255,0.05);
+    color: white;
+
+    font-size: 8px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.timeline-button:hover,
+.small-button:hover {
+    background: rgba(255,255,255,0.12);
+}
+
+.timeline-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: 10px;
+}
+
+.timeline-edge {
+    min-width: 32px;
+
+    font-size: 8px;
+    color: rgba(255,255,255,0.35);
+}
+
+.timeline-edge:last-child {
+    text-align: right;
+}
+
+
+/* Slider */
+
+#timelineSlider {
+    flex: 1;
+
+    appearance: none;
+
+    height: 3px;
+
+    background: rgba(255,255,255,0.18);
+
+    border-radius: 10px;
+
+    cursor: pointer;
+}
+
+#timelineSlider::-webkit-slider-thumb {
+    appearance: none;
+
+    width: 15px;
+    height: 15px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    border: 3px solid #080a0e;
+
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.5),
+        0 0 15px rgba(255,255,255,0.3);
+
+    cursor: grab;
+}
+
+#timelineSlider::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    border: 3px solid #080a0e;
+
+    cursor: grab;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.explorer {
+    position: fixed;
+
+    top: 172px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    display: grid;
+
+    grid-template-columns: minmax(0, 1fr) 350px;
+}
+
+
+/* =========================================================
+   MAP
+========================================================= */
+
+.map-section {
+    position: relative;
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+
+    background: #101419;
+}
+
+
+/* Remove some Leaflet visual clutter */
+
+.leaflet-control-attribution {
+    background: rgba(0,0,0,0.6) !important;
+    color: rgba(255,255,255,0.5) !important;
+}
+
+.leaflet-control-attribution a {
+    color: rgba(255,255,255,0.7) !important;
+}
+
+.leaflet-control-zoom {
+    display: none;
+}
+
+
+/* Map overlay */
+
+.map-overlay {
+    position: absolute;
+
+    z-index: 500;
+
+    top: 20px;
+    left: 20px;
+}
+
+.map-location {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 13px;
+
+    background: rgba(5,7,10,0.82);
+
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 7px;
+
+    backdrop-filter: blur(15px);
+}
+
+.map-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    box-shadow:
+        0 0 0 4px rgba(255,255,255,0.08),
+        0 0 14px rgba(255,255,255,0.5);
+}
+
+.map-location-label {
+    font-size: 7px;
+    letter-spacing: 1.4px;
+    color: rgba(255,255,255,0.4);
+}
+
+#mapLocationName {
+    margin-top: 2px;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* Map controls */
+
+.map-controls {
+    position: absolute;
+
+    z-index: 500;
+
+    right: 18px;
+    bottom: 20px;
+
+    display: flex;
+    flex-direction: column;
+
+    border: 1px solid rgba(255,255,255,0.1);
+
+    border-radius: 6px;
+
+    overflow: hidden;
+
+    background: rgba(5,7,10,0.8);
+}
+
+.map-control {
+    width: 35px;
+    height: 35px;
+
+    border: 0;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 18px;
+
+    cursor: pointer;
+}
+
+.map-control + .map-control {
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+
+/* Loading */
+
+.loading {
+    position: absolute;
+
+    z-index: 700;
+
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 14px;
+
+    background: rgba(4,6,9,0.72);
+
+    backdrop-filter: blur(3px);
+
+    transition: opacity 0.3s ease;
+}
+
+.loading.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-spinner {
+    width: 30px;
+    height: 30px;
+
+    border: 2px solid rgba(255,255,255,0.15);
+    border-top-color: white;
+
+    border-radius: 50%;
+
+    animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+    font-size: 8px;
+
+    letter-spacing: 2px;
+
+    color: rgba(255,255,255,0.6);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   RIGHT PROPERTIES
+========================================================= */
+
+.properties-panel {
+    position: relative;
+
+    z-index: 800;
+
+    height: 100%;
+
+    overflow-y: auto;
+
+    padding: 22px 20px;
+
+    background: #090b0f;
+
+    border-left: 1px solid rgba(255,255,255,0.08);
+}
+
+.properties-panel::-webkit-scrollbar {
+    width: 4px;
+}
+
+.properties-panel::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+}
+
+
+/* Header */
+
+.properties-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    margin-bottom: 18px;
+}
+
+.properties-header h1 {
+    margin-top: 4px;
+
+    font-size: 25px;
+    font-weight: 500;
+}
+
+
+/* Location */
+
+.property-location {
+    padding-bottom: 18px;
+
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.location-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.location-pin {
+    margin-top: 3px;
+
+    font-size: 10px;
+}
+
+#heroLocation {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+#heroRegion {
+    margin-top: 3px;
+
+    font-size: 10px;
+
+    color: rgba(255,255,255,0.4);
+}
+
+
+/* Dataset */
+
+.dataset-section {
+    padding: 18px 0;
+
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.dataset-title {
+    margin-top: 6px;
+
+    font-size: 16px;
+    line-height: 1.3;
+}
+
+.dataset-meta {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    margin-top: 14px;
+}
+
+.dataset-meta div {
+    padding: 9px;
+
+    background: rgba(255,255,255,0.035);
+
+    border-radius: 5px;
+}
+
+.dataset-meta span,
+.detail-row span,
+.modal-info span {
+    display: block;
+
+    font-size: 7px;
+
+    letter-spacing: 1px;
+
+    color: rgba(255,255,255,0.35);
+}
+
+.dataset-meta strong {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 10px;
+}
+
+
+/* Layers */
+
+.layers-section {
+    padding: 18px 0;
+
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.layer-card {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 7px;
+    padding: 10px;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    background: rgba(255,255,255,0.025);
+
+    color: white;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border 0.2s ease,
+        transform 0.2s ease;
+}
+
+.layer-card:hover {
+    background: rgba(255,255,255,0.07);
+    transform: translateX(2px);
+}
+
+.layer-card.active {
+    background: rgba(255,255,255,0.08);
+
+    border-color: rgba(255,255,255,0.15);
+}
+
+.layer-icon {
+    width: 25px;
+    height: 25px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 5px;
+
+    background: rgba(255,255,255,0.07);
+
+    font-size: 13px;
+}
+
+.layer-content {
+    flex: 1;
+}
+
+.layer-content strong {
+    display: block;
+
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.layer-content small {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 8px;
+
+    color: rgba(255,255,255,0.35);
+}
+
+.layer-arrow {
+    color: rgba(255,255,255,0.3);
+
+    font-size: 12px;
+}
+
+
+/* Location details */
+
+.location-details {
+    padding: 18px 0;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+
+    padding: 8px 0;
+
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.detail-row strong {
+    max-width: 60%;
+
+    font-size: 9px;
+
+    text-align: right;
+}
+
+
+/* Story */
+
+.story-button {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 8px;
+    padding: 13px;
+
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+
+    background: white;
+
+    color: black;
+
+    cursor: pointer;
+}
+
+.story-button div {
+    flex: 1;
+
+    text-align: left;
+}
+
+.story-button strong {
+    display: block;
+
+    font-size: 10px;
+}
+
+.story-button small {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 8px;
+
+    opacity: 0.5;
+}
+
+
+/* =========================================================
+   COMPARISON
+========================================================= */
+
+.comparison-section {
+    position: fixed;
+
+    z-index: 1500;
+
+    left: 50%;
+    bottom: 20px;
+
+    width: min(600px, calc(100% - 40px));
+
+    transform: translateX(-50%);
+
+    padding: 20px;
+
+    background: rgba(7,9,12,0.96);
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    border-radius: 10px;
+
+    backdrop-filter: blur(20px);
+
+    display: none;
+}
+
+.comparison-section.visible {
+    display: block;
+}
+
+.comparison-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comparison-header h2 {
+    margin-top: 5px;
+
+    font-size: 20px;
+
+    font-weight: 500;
+}
+
+.comparison-grid {
+    display: grid;
+
+    grid-template-columns: 1fr auto 1fr;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-top: 20px;
+}
+
+.comparison-card {
+    padding: 15px;
+
+    background: rgba(255,255,255,0.05);
+
+    border-radius: 6px;
+}
+
+.comparison-card span {
+    display: block;
+
+    font-size: 7px;
+    letter-spacing: 1px;
+
+    color: rgba(255,255,255,0.4);
+}
+
+.comparison-card strong {
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 20px;
+}
+
+.comparison-arrow {
+    font-size: 20px;
+
+    color: rgba(255,255,255,0.4);
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal {
+    position: fixed;
+
+    z-index: 2000;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(0,0,0,0.7);
+
+    backdrop-filter: blur(8px);
+}
+
+.modal.visible {
+    display: flex;
+}
+
+.modal-box {
+    position: relative;
+
+    width: min(500px, 100%);
+
+    padding: 28px;
+
+    background: #0b0e12;
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    border-radius: 10px;
+}
+
+.modal-box h2 {
+    margin-top: 7px;
+
+    font-size: 23px;
+    font-weight: 500;
+}
+
+.modal-close {
+    position: absolute;
+
+    top: 15px;
+    right: 15px;
+
+    width: 30px;
+    height: 30px;
+
+    border: 0;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 22px;
+
+    cursor: pointer;
+}
+
+.modal-info {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    margin-top: 22px;
+}
+
+.modal-info div {
+    padding: 12px;
+
+    background: rgba(255,255,255,0.04);
+
+    border-radius: 5px;
+}
+
+.modal-info strong {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 10px;
+}
+
+.modal-description {
+    margin-top: 18px;
+
+    font-size: 10px;
+
+    line-height: 1.6;
+
+    color: rgba(255,255,255,0.45);
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 850px) {
+
+    html,
+    body {
+        overflow: auto;
+    }
+
+    .location-header {
+        display: none;
+    }
+
+    .explorer {
+        position: relative;
+
+        top: 172px;
+
+        display: block;
+
+        height: auto;
+    }
+
+    .map-section {
+        height: 60vh;
+    }
+
+    .properties-panel {
+        height: auto;
+
+        overflow: visible;
+
+        border-left: 0;
+        border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .timeline {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+}
+/* =========================================================
+   TIME EARTH — EARTH INTELLIGENCE UI
+========================================================= */
+
+.earth-intelligence-panel,
+.earth-ai-panel,
+.earth-comparison-panel,
+.earth-events-panel {
+
+    position: fixed;
+
+    z-index: 2000;
+
+    background:
+        rgba(8, 10, 14, 0.94);
+
+    border:
+        1px solid rgba(255,255,255,0.12);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.45);
+
+    backdrop-filter:
+        blur(18px);
+
+    color: white;
+
+}
+
+
+/* =====================================================
+   DATA INSPECTOR
+===================================================== */
+
+.earth-intelligence-panel {
+
+    right: 370px;
+
+    bottom: 24px;
+
+    width: 380px;
+
+    padding: 22px;
+
+    border-radius: 18px;
+
+    transform:
+        translateY(30px);
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition:
+        all 0.35s ease;
+
+}
+
+
+.earth-intelligence-panel.visible {
+
+    transform:
+        translateY(0);
+
+    opacity: 1;
+
+    pointer-events: auto;
+
+}
+
+
+.ei-header {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
+}
+
+
+.ei-eyebrow {
+
+    font-size: 10px;
+
+    letter-spacing: 0.18em;
+
+    font-weight: 700;
+
+    opacity: 0.55;
+
+}
+
+
+.ei-header h2,
+.earth-ai-panel h2,
+.earth-comparison-panel h2,
+.earth-events-panel h2 {
+
+    margin:
+        5px 0 0;
+
+    font-size: 22px;
+
+}
+
+
+.ei-close {
+
+    border: 0;
+
+    background:
+        rgba(255,255,255,0.08);
+
+    color: white;
+
+    width: 30px;
+
+    height: 30px;
+
+    border-radius: 50%;
+
+    cursor: pointer;
+
+    font-size: 20px;
+
+}
+
+
+.ei-location {
+
+    margin:
+        18px 0;
+
+    padding:
+        12px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255,255,255,0.05);
+
+    font-size: 13px;
+
+    line-height: 1.6;
+
+}
+
+
+.ei-signals {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 8px;
+
+}
+
+
+.ei-signal {
+
+    display: flex;
+
+    gap: 10px;
+
+    align-items:
+        center;
+
+    padding: 11px;
+
+    border-radius: 11px;
+
+    background:
+        rgba(255,255,255,0.045);
+
+}
+
+
+.ei-signal-icon {
+
+    font-size: 18px;
+
+}
+
+
+.ei-signal-title {
+
+    display: block;
+
+    font-size: 10px;
+
+    opacity: 0.5;
+
+}
+
+
+.ei-signal strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 12px;
+
+}
+
+
+.ei-observation {
+
+    margin-top: 12px;
+
+    padding: 13px;
+
+    border-radius: 11px;
+
+    background:
+        rgba(255,255,255,0.04);
+
+}
+
+
+.ei-observation span {
+
+    display: block;
+
+    font-size: 9px;
+
+    letter-spacing: 0.14em;
+
+    opacity: 0.45;
+
+}
+
+
+.ei-observation strong {
+
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 12px;
+
+}
+
+
+/* =====================================================
+   EARTH INTELLIGENCE
+===================================================== */
+
+.earth-ai-panel {
+
+    left: 24px;
+
+    bottom: 24px;
+
+    width: 320px;
+
+    padding: 22px;
+
+    border-radius: 18px;
+
+}
+
+
+.earth-ai-panel p {
+
+    color:
+        rgba(255,255,255,0.68);
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+}
+
+
+.ei-key-signals {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+    margin:
+        15px 0;
+
+}
+
+
+.ei-key-signals span {
+
+    padding:
+        7px 9px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(255,255,255,0.07);
+
+    font-size: 10px;
+
+}
+
+
+.ei-action {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid
+        rgba(255,255,255,0.18);
+
+    border-radius: 10px;
+
+    background:
+        rgba(255,255,255,0.08);
+
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.08em;
+
+    transition:
+        all 0.2s ease;
+
+}
+
+
+.ei-action:hover {
+
+    background:
+        rgba(255,255,255,0.15);
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+/* =====================================================
+   COMPARISON
+===================================================== */
+
+.earth-comparison-panel {
+
+    left: 24px;
+
+    top: 195px;
+
+    width: 320px;
+
+    padding: 20px;
+
+    border-radius: 18px;
+
+}
+
+
+.ei-years {
+
+    display: flex;
+
+    align-items:
+        flex-end;
+
+    gap: 10px;
+
+    margin:
+        18px 0;
+
+}
+
+
+.ei-years label {
+
+    flex: 1;
+
+    font-size: 9px;
+
+    letter-spacing:
+        0.12em;
+
+    opacity: 0.55;
+
+}
+
+
+.ei-years input {
+
+    display: block;
+
+    width: 100%;
+
+    margin-top: 6px;
+
+    box-sizing:
+        border-box;
+
+    padding: 9px;
+
+    border:
+        1px solid rgba(255,255,255,0.12);
+
+    border-radius: 8px;
+
+    background:
+        rgba(255,255,255,0.06);
+
+    color: white;
+
+}
+
+
+.ei-comparison-result {
+
+    margin-top: 12px;
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255,255,255,0.04);
+
+    font-size: 12px;
+
+    line-height: 1.6;
+
+}
+
+
+.comparison-title {
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+}
+
+
+.comparison-placeholder {
+
+    margin-top: 10px;
+
+    opacity: 0.65;
+
+}
+
+
+/* =====================================================
+   EVENTS
+===================================================== */
+
+.earth-events-panel {
+
+    right: 370px;
+
+    top: 195px;
+
+    width: 300px;
+
+    padding: 20px;
+
+    border-radius: 18px;
+
+}
+
+
+.earth-event {
+
+    display: flex;
+
+    gap: 9px;
+
+    align-items:
+        flex-start;
+
+    padding: 11px 0;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.07);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+
+}
+
+
+.earth-event:last-child {
+
+    border-bottom: 0;
+
+}
+
+
+.earth-event span {
+
+    font-size: 15px;
+
+}
+
+
+/* =====================================================
+   INSPECTOR MARKER
+===================================================== */
+
+.leaflet-interactive {
+
+    transition:
+        all 0.2s ease;
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 850px) {
+
+    .earth-intelligence-panel,
+    .earth-ai-panel,
+    .earth-comparison-panel,
+    .earth-events-panel {
+
+        left: 12px;
+
+        right: 12px;
+
+        width: auto;
+
+    }
+
+
+    .earth-intelligence-panel {
+
+        bottom: 12px;
+
+    }
+
+
+    .earth-ai-panel {
+
+        display: none;
+
+    }
+
+
+    .earth-comparison-panel {
+
+        display: none;
+
+    }
+
+
+    .earth-events-panel {
+
+        display: none;
+
+    }
+
+}
+/* =========================================================
+   TIME EARTH — EARTH INTELLIGENCE
+========================================================= */
+
+
+/* =========================================================
+   MAIN INTELLIGENCE PANEL
+========================================================= */
+
+.earth-intelligence-panel {
+
+    position: fixed;
+
+    left: 24px;
+
+    bottom: 24px;
+
+    width: 390px;
+
+    max-width: calc(100vw - 48px);
+
+    max-height: calc(100vh - 220px);
+
+    overflow-y: auto;
+
+    background:
+        rgba(8, 11, 16, 0.94);
+
+    border:
+        1px solid rgba(255,255,255,.12);
+
+    border-radius: 18px;
+
+    backdrop-filter:
+        blur(24px);
+
+    -webkit-backdrop-filter:
+        blur(24px);
+
+    box-shadow:
+        0 24px 80px rgba(0,0,0,.55);
+
+    color: white;
+
+    z-index: 9999;
+
+    padding: 20px;
+
+    opacity: 0;
+
+    transform:
+        translateY(18px)
+        scale(.97);
+
+    pointer-events: none;
+
+    transition:
+        opacity .25s ease,
+        transform .25s ease;
+
+}
+
+
+.earth-intelligence-panel.visible {
+
+    opacity: 1;
+
+    transform:
+        translateY(0)
+        scale(1);
+
+    pointer-events: auto;
+
+}
+
+
+.earth-intelligence-panel.minimized {
+
+    height: 58px;
+
+    overflow: hidden;
+
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.ei-header {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+}
+
+
+.ei-kicker {
+
+    font-size: 9px;
+
+    letter-spacing: 2.4px;
+
+    font-weight: 800;
+
+    opacity: .45;
+
+    margin-bottom: 5px;
+
+}
+
+
+.ei-header h2 {
+
+    margin: 0;
+
+    font-size: 22px;
+
+    font-weight: 700;
+
+    letter-spacing: -.5px;
+
+}
+
+
+.ei-close {
+
+    width: 32px;
+
+    height: 32px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(255,255,255,.12);
+
+    background:
+        rgba(255,255,255,.06);
+
+    color: white;
+
+    font-size: 20px;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+.ei-close:hover {
+
+    background:
+        rgba(255,255,255,.13);
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.ei-status {
+
+    margin-top: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.7px;
+
+    opacity: .55;
+
+}
+
+
+.ei-status-dot {
+
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #63ff9c;
+
+    box-shadow:
+        0 0 12px #63ff9c;
+
+    animation:
+        eiPulse 1.8s infinite;
+
+}
+
+
+@keyframes eiPulse {
+
+    0% {
+        opacity: .35;
+        transform: scale(.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+
+    100% {
+        opacity: .35;
+        transform: scale(.8);
+    }
+
+}
+
+
+/* =========================================================
+   LOCATION
+========================================================= */
+
+.ei-location {
+
+    margin-top: 16px;
+
+    padding:
+        13px 14px;
+
+    background:
+        rgba(255,255,255,.045);
+
+    border:
+        1px solid rgba(255,255,255,.07);
+
+    border-radius: 12px;
+
+    font-size: 13px;
+
+    line-height: 1.45;
+
+}
+
+
+.ei-location strong {
+
+    display: block;
+
+    font-size: 15px;
+
+}
+
+
+.ei-location span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    opacity: .5;
+
+    font-size: 11px;
+
+}
+
+
+/* =========================================================
+   OBSERVATION
+========================================================= */
+
+.ei-observation {
+
+    margin-top: 14px;
+
+}
+
+
+.ei-empty {
+
+    text-align: center;
+
+    padding:
+        20px 10px;
+
+    opacity: .6;
+
+}
+
+
+.ei-big-icon {
+
+    font-size: 30px;
+
+    margin-bottom: 8px;
+
+}
+
+
+.ei-empty strong {
+
+    display: block;
+
+    font-size: 14px;
+
+}
+
+
+.ei-empty p {
+
+    font-size: 11px;
+
+    opacity: .6;
+
+    line-height: 1.5;
+
+}
+
+
+/* =========================================================
+   OBSERVATION CARD
+========================================================= */
+
+.ei-observation {
+
+    display: flex;
+
+    gap: 13px;
+
+    padding:
+        15px;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.07),
+            rgba(255,255,255,.025)
+        );
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+}
+
+
+.ei-observation-icon {
+
+    width: 44px;
+
+    height: 44px;
+
+    min-width: 44px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,.07);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 22px;
+
+}
+
+
+.ei-observation-main {
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+
+.ei-label {
+
+    font-size: 8px;
+
+    letter-spacing: 1.7px;
+
+    font-weight: 800;
+
+    opacity: .42;
+
+}
+
+
+.ei-dataset-name {
+
+    margin-top: 3px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   DATA GRID
+========================================================= */
+
+.ei-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 9px;
+
+    margin-top: 14px;
+
+}
+
+
+.ei-grid > div {
+
+    padding:
+        9px;
+
+    background:
+        rgba(0,0,0,.18);
+
+    border-radius: 9px;
+
+}
+
+
+.ei-grid span {
+
+    display: block;
+
+    font-size: 7px;
+
+    letter-spacing: 1.2px;
+
+    opacity: .38;
+
+    font-weight: 800;
+
+}
+
+
+.ei-grid strong {
+
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+
+/* =========================================================
+   INTELLIGENCE
+========================================================= */
+
+.ei-intelligence {
+
+    margin-top: 15px;
+
+}
+
+
+.ei-section-title {
+
+    font-size: 8px;
+
+    letter-spacing: 1.8px;
+
+    font-weight: 800;
+
+    opacity: .4;
+
+    margin-bottom: 7px;
+
+}
+
+
+.ei-insight {
+
+    display: flex;
+
+    gap: 11px;
+
+    padding: 13px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,.035);
+
+    border:
+        1px solid rgba(255,255,255,.06);
+
+}
+
+
+.ei-insight-icon {
+
+    font-size: 18px;
+
+    line-height: 1;
+
+}
+
+
+.ei-insight strong {
+
+    display: block;
+
+    font-size: 12px;
+
+}
+
+
+.ei-insight p {
+
+    margin:
+        5px 0 0;
+
+    font-size: 10px;
+
+    line-height: 1.55;
+
+    opacity: .58;
+
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.ei-footer {
+
+    margin-top: 15px;
+
+    display: flex;
+
+    gap: 7px;
+
+    font-size: 8px;
+
+    letter-spacing: 1.2px;
+
+    opacity: .28;
+
+}
+
+
+/* =========================================================
+   INSPECTION MARKER
+========================================================= */
+
+.earth-inspection-marker {
+
+    background: transparent;
+
+    border: none;
+
+}
+
+
+.ei-marker-outer {
+
+    width: 30px;
+
+    height: 30px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(255,255,255,.8);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    animation:
+        eiMarkerPulse 1.7s infinite;
+
+}
+
+
+.ei-marker-inner {
+
+    width: 8px;
+
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    box-shadow:
+        0 0 16px white;
+
+}
+
+
+@keyframes eiMarkerPulse {
+
+    0% {
+
+        transform:
+            scale(.65);
+
+        opacity:
+            .45;
+
+    }
+
+    50% {
+
+        transform:
+            scale(1);
+
+        opacity:
+            1;
+
+    }
+
+    100% {
+
+        transform:
+            scale(.65);
+
+        opacity:
+            .45;
+
+    }
+
+}
+
+
+/* =========================================================
+   HISTORICAL COMPARISON PANEL
+========================================================= */
+
+.earth-ai-panel {
+
+    position: fixed;
+
+    right: 375px;
+
+    bottom: 24px;
+
+    width: 300px;
+
+    padding: 17px;
+
+    border-radius: 16px;
+
+    background:
+        rgba(8,11,16,.94);
+
+    border:
+        1px solid rgba(255,255,255,.1);
+
+    backdrop-filter:
+        blur(22px);
+
+    -webkit-backdrop-filter:
+        blur(22px);
+
+    color: white;
+
+    z-index: 9998;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.5);
+
+    opacity: 0;
+
+    transform:
+        translateY(12px);
+
+    pointer-events: none;
+
+    transition:
+        .25s ease;
+
+}
+
+
+.earth-ai-panel.visible {
+
+    opacity: 1;
+
+    transform:
+        translateY(0);
+
+    pointer-events: auto;
+
+}
+
+
+.ei-ai-top {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+}
+
+
+.ei-ai-top strong {
+
+    font-size: 14px;
+
+}
+
+
+/* =========================================================
+   TIME MACHINE
+========================================================= */
+
+.ei-time-row {
+
+    display: grid;
+
+    grid-template-columns:
+        60px 1fr 60px;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 18px;
+
+}
+
+
+.ei-year {
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    opacity: .55;
+
+}
+
+
+.ei-year.current {
+
+    opacity: 1;
+
+}
+
+
+.ei-line {
+
+    height: 1px;
+
+    background:
+        rgba(255,255,255,.18);
+
+    position: relative;
+
+}
+
+
+.ei-line span {
+
+    position: absolute;
+
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    left: 50%;
+
+    top: 50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    box-shadow:
+        0 0 14px white;
+
+}
+
+
+.ei-comparison-text {
+
+    margin-top: 18px;
+
+}
+
+
+.ei-comparison-text strong {
+
+    font-size: 12px;
+
+}
+
+
+.ei-comparison-text p {
+
+    font-size: 10px;
+
+    line-height: 1.5;
+
+    opacity: .55;
+
+    margin:
+        7px 0 0;
+
+}
+
+
+.ei-note {
+
+    padding-top: 8px;
+
+    border-top:
+        1px solid rgba(255,255,255,.07);
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 850px) {
+
+    .earth-intelligence-panel {
+
+        left: 12px;
+
+        right: 12px;
+
+        bottom: 12px;
+
+        width: auto;
+
+        max-width: none;
+
+        max-height: 55vh;
+
+    }
+
+
+    .earth-ai-panel {
+
+        left: 12px;
+
+        right: 12px;
+
+        bottom: auto;
+
+        top: 185px;
+
+        width: auto;
+
+    }
+
+}
+
+
+@media (max-width: 500px) {
+
+    .ei-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+    .earth-intelligence-panel {
+
+        padding: 15px;
+
+    }
+
+}
+/* =========================================================
+   TIME EARTH — EARTH INTELLIGENCE FEATURE
+========================================================= */
+
+#timeEarthIntelligence {
+
+    position: fixed;
+
+    left: 24px;
+
+    top: 190px;
+
+    width: 370px;
+
+    max-width: calc(100vw - 48px);
+
+    color: white;
+
+    background:
+        rgba(7, 10, 14, 0.96);
+
+    border:
+        1px solid rgba(255,255,255,.15);
+
+    border-radius: 18px;
+
+    padding: 18px;
+
+    z-index: 10000;
+
+    box-shadow:
+        0 20px 70px rgba(0,0,0,.6);
+
+    backdrop-filter:
+        blur(20px);
+
+    -webkit-backdrop-filter:
+        blur(20px);
+
+    font-family:
+        Arial,
+        sans-serif;
+
+}
+
+
+/* TOP */
+
+.ei-top {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+}
+
+
+.ei-mini {
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+
+    opacity: .45;
+
+    font-weight: 800;
+
+}
+
+
+.ei-title {
+
+    margin-top: 4px;
+
+    font-size: 18px;
+
+    font-weight: 800;
+
+    letter-spacing: -.4px;
+
+}
+
+
+.ei-live {
+
+    font-size: 8px;
+
+    letter-spacing: 1px;
+
+    font-weight: 800;
+
+    opacity: .7;
+
+}
+
+
+/* INSTRUCTION */
+
+.ei-instruction {
+
+    display: flex;
+
+    gap: 12px;
+
+    align-items: center;
+
+    margin-top: 15px;
+
+    padding: 13px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,.055);
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+}
+
+
+.ei-satellite {
+
+    width: 40px;
+
+    height: 40px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background:
+        rgba(255,255,255,.07);
+
+    font-size: 20px;
+
+}
+
+
+.ei-instruction strong {
+
+    font-size: 13px;
+
+}
+
+
+.ei-instruction p {
+
+    margin: 4px 0 0;
+
+    font-size: 10px;
+
+    opacity: .5;
+
+}
+
+
+/* RESULT */
+
+.ei-result {
+
+    margin-top: 13px;
+
+}
+
+
+.ei-placeholder {
+
+    padding: 20px;
+
+    text-align: center;
+
+    border-radius: 13px;
+
+    background:
+        rgba(255,255,255,.025);
+
+    border:
+        1px dashed rgba(255,255,255,.12);
+
+}
+
+
+.ei-placeholder div {
+
+    font-size: 28px;
+
+    margin-bottom: 7px;
+
+}
+
+
+.ei-placeholder strong {
+
+    display: block;
+
+    font-size: 12px;
+
+}
+
+
+.ei-placeholder span {
+
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 9px;
+
+    opacity: .4;
+
+}
+
+
+/* OBSERVED */
+
+.ei-observed {
+
+    border-radius: 13px;
+
+}
+
+
+.ei-observed-head {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+}
+
+
+.ei-icon {
+
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background:
+        rgba(255,255,255,.07);
+
+    font-size: 21px;
+
+}
+
+
+.ei-label {
+
+    font-size: 7px;
+
+    letter-spacing: 1.5px;
+
+    font-weight: 800;
+
+    opacity: .4;
+
+}
+
+
+.ei-observed-head strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 14px;
+
+}
+
+
+/* LOCATION */
+
+.ei-location-card {
+
+    margin-top: 12px;
+
+    padding: 11px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255,255,255,.035);
+
+}
+
+
+.ei-location-name {
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+}
+
+
+.ei-country {
+
+    margin-top: 3px;
+
+    font-size: 9px;
+
+    opacity: .45;
+
+}
+
+
+/* GRID */
+
+.ei-data-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 7px;
+
+    margin-top: 10px;
+
+}
+
+
+.ei-data-grid > div {
+
+    padding: 9px;
+
+    border-radius: 9px;
+
+    background:
+        rgba(255,255,255,.035);
+
+}
+
+
+.ei-data-grid span {
+
+    display: block;
+
+    font-size: 6px;
+
+    letter-spacing: 1.2px;
+
+    opacity: .35;
+
+    font-weight: 800;
+
+}
+
+
+.ei-data-grid strong {
+
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+}
+
+
+/* INSIGHT */
+
+.ei-insight {
+
+    margin-top: 10px;
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255,255,255,.04);
+
+    border:
+        1px solid rgba(255,255,255,.06);
+
+}
+
+
+.ei-insight-heading {
+
+    font-size: 8px;
+
+    letter-spacing: 1.3px;
+
+    font-weight: 800;
+
+    opacity: .55;
+
+}
+
+
+.ei-insight p {
+
+    margin: 6px 0 0;
+
+    font-size: 9px;
+
+    line-height: 1.55;
+
+    opacity: .55;
+
+}
+
+
+/* SOURCE */
+
+.ei-source {
+
+    margin-top: 10px;
+
+    font-size: 7px;
+
+    letter-spacing: 1.2px;
+
+    opacity: .3;
+
+}
+
+
+.ei-source span {
+
+    margin: 0 5px;
+
+}
+
+
+/* MAP MARKER */
+
+.ei-map-marker {
+
+    background: transparent !important;
+
+    border: none !important;
+
+}
+
+
+.ei-marker-ring {
+
+    width: 32px;
+
+    height: 32px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(255,255,255,.9);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    animation:
+        ei-ring-pulse 1.5s infinite;
+
+}
+
+
+.ei-marker-dot {
+
+    width: 8px;
+
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    box-shadow:
+        0 0 14px white;
+
+}
+
+
+@keyframes ei-ring-pulse {
+
+    0% {
+
+        transform: scale(.7);
+
+        opacity: .4;
+
+    }
+
+    50% {
+
+        transform: scale(1);
+
+        opacity: 1;
+
+    }
+
+    100% {
+
+        transform: scale(.7);
+
+        opacity: .4;
+
+    }
+
+}
+
+
+/* MOBILE */
+
+@media (max-width: 850px) {
+
+    #timeEarthIntelligence {
+
+        left: 12px;
+
+        top: 180px;
+
+        width: calc(100vw - 24px);
+
+        max-width: none;
+
+    }
+
+}
+/* =========================================================
+   TIME EARTH — EARTH INTELLIGENCE
+   FINAL UI
+========================================================= */
+
+#timeEarthIntelligence {
+
+    position: fixed;
+
+    left: 24px;
+    top: 190px;
+
+    width: 370px;
+
+    max-width: calc(100vw - 48px);
+
+    max-height: calc(100vh - 215px);
+
+    overflow-y: auto;
+
+    z-index: 10000;
+
+    padding: 18px;
+
+    color: white;
+
+    background:
+        rgba(7, 10, 15, 0.97);
+
+    border:
+        1px solid rgba(255,255,255,0.14);
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 25px 80px rgba(0,0,0,0.65);
+
+    backdrop-filter:
+        blur(25px);
+
+    -webkit-backdrop-filter:
+        blur(25px);
+
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+#timeEarthIntelligence .ei-header {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+}
+
+
+#timeEarthIntelligence .ei-kicker {
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: 2.4px;
+
+    opacity: .4;
+
+}
+
+
+#timeEarthIntelligence .ei-header h2 {
+
+    margin: 4px 0 0;
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    letter-spacing: -.4px;
+
+}
+
+
+#timeEarthIntelligence .ei-live-badge {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    margin-top: 3px;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.4px;
+
+    opacity: .65;
+
+}
+
+
+#timeEarthIntelligence .ei-live-badge span {
+
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 0 10px rgba(255,255,255,.8);
+
+}
+
+
+/* =========================================================
+   INSTRUCTION
+========================================================= */
+
+#timeEarthIntelligence .ei-instruction {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    margin-top: 15px;
+
+    padding: 12px;
+
+    background:
+        rgba(255,255,255,.045);
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+    border-radius: 11px;
+
+}
+
+
+#timeEarthIntelligence .ei-satellite-icon {
+
+    width: 38px;
+    height: 38px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        rgba(255,255,255,.07);
+
+    border-radius: 10px;
+
+    font-size: 19px;
+
+}
+
+
+#timeEarthIntelligence .ei-instruction strong {
+
+    display: block;
+
+    font-size: 12px;
+
+}
+
+
+#timeEarthIntelligence .ei-instruction p {
+
+    margin: 3px 0 0;
+
+    font-size: 9px;
+
+    line-height: 1.4;
+
+    opacity: .45;
+
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+#timeEarthIntelligence .ei-empty {
+
+    margin-top: 12px;
+
+    padding: 25px 15px;
+
+    text-align: center;
+
+    background:
+        rgba(255,255,255,.025);
+
+    border:
+        1px dashed rgba(255,255,255,.12);
+
+    border-radius: 12px;
+
+}
+
+
+#timeEarthIntelligence .ei-empty-icon {
+
+    width: 38px;
+    height: 38px;
+
+    margin: 0 auto 9px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid rgba(255,255,255,.15);
+
+    border-radius: 50%;
+
+    font-size: 15px;
+
+    opacity: .6;
+
+}
+
+
+#timeEarthIntelligence .ei-empty strong {
+
+    display: block;
+
+    font-size: 12px;
+
+}
+
+
+#timeEarthIntelligence .ei-empty p {
+
+    margin-top: 5px;
+
+    font-size: 9px;
+
+    line-height: 1.5;
+
+    opacity: .4;
+
+}
+
+
+/* =========================================================
+   OBSERVATION
+========================================================= */
+
+#timeEarthIntelligence .ei-observation-card {
+
+    margin-top: 12px;
+
+}
+
+
+#timeEarthIntelligence .ei-observation-heading {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+#timeEarthIntelligence .ei-observation-icon {
+
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        rgba(255,255,255,.07);
+
+    border-radius: 11px;
+
+    font-size: 21px;
+
+}
+
+
+#timeEarthIntelligence .ei-label {
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+
+    opacity: .4;
+
+}
+
+
+#timeEarthIntelligence .ei-dataset {
+
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   LOCATION
+========================================================= */
+
+#timeEarthIntelligence .ei-place {
+
+    margin-top: 12px;
+
+    padding: 10px;
+
+    background:
+        rgba(255,255,255,.035);
+
+    border-radius: 9px;
+
+}
+
+
+#timeEarthIntelligence .ei-place strong {
+
+    display: block;
+
+    font-size: 12px;
+
+}
+
+
+#timeEarthIntelligence .ei-place span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 8px;
+
+    opacity: .45;
+
+}
+
+
+/* =========================================================
+   DATA GRID
+========================================================= */
+
+#timeEarthIntelligence .ei-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 7px;
+
+    margin-top: 9px;
+
+}
+
+
+#timeEarthIntelligence .ei-grid > div {
+
+    padding: 8px;
+
+    background:
+        rgba(255,255,255,.035);
+
+    border-radius: 8px;
+
+}
+
+
+#timeEarthIntelligence .ei-grid span {
+
+    display: block;
+
+    font-size: 6px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.1px;
+
+    opacity: .35;
+
+}
+
+
+#timeEarthIntelligence .ei-grid strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+}
+
+
+/* =========================================================
+   INTELLIGENCE
+========================================================= */
+
+#timeEarthIntelligence .ei-insight-box {
+
+    margin-top: 9px;
+
+    padding: 11px;
+
+    background:
+        rgba(255,255,255,.04);
+
+    border:
+        1px solid rgba(255,255,255,.06);
+
+    border-radius: 10px;
+
+}
+
+
+#timeEarthIntelligence .ei-insight-title {
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+
+    opacity: .55;
+
+}
+
+
+#timeEarthIntelligence .ei-insight-box p {
+
+    margin: 6px 0 0;
+
+    font-size: 9px;
+
+    line-height: 1.55;
+
+    opacity: .55;
+
+}
+
+
+/* =========================================================
+   SOURCE
+========================================================= */
+
+#timeEarthIntelligence .ei-source {
+
+    margin-top: 9px;
+
+    font-size: 7px;
+
+    letter-spacing: 1px;
+
+    opacity: .3;
+
+}
+
+
+#timeEarthIntelligence .ei-source span {
+
+    margin: 0 5px;
+
+}
+
+
+/* =========================================================
+   INSPECTION MARKER
+========================================================= */
+
+.ei-inspection-icon {
+
+    background: transparent !important;
+
+    border: none !important;
+
+}
+
+
+.ei-marker-ring {
+
+    width: 34px;
+    height: 34px;
+
+    border:
+        1px solid rgba(255,255,255,.9);
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    animation:
+        eiInspectionPulse 1.5s infinite;
+
+}
+
+
+.ei-marker-dot {
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    box-shadow:
+        0 0 15px rgba(255,255,255,.95);
+
+}
+
+
+@keyframes eiInspectionPulse {
+
+    0% {
+        transform: scale(.65);
+        opacity: .4;
+    }
+
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(.65);
+        opacity: .4;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 850px) {
+
+    #timeEarthIntelligence {
+
+        left: 12px;
+        right: 12px;
+
+        top: 182px;
+
+        width: auto;
+
+        max-width: none;
+
+        max-height: 55vh;
+
+    }
+
+}
+/* =========================================================
+   TIME EARTH — NASA EARTH INTELLIGENCE
+   ========================================================= */
+
+#timeEarthIntelligence {
+  position: fixed;
+
+  left: 24px;
+  top: 190px;
+
+  width: 370px;
+  max-height: calc(100vh - 215px);
+
+  overflow-y: auto;
+
+  z-index: 10000;
+
+  box-sizing: border-box;
+
+  padding: 18px;
+
+  border-radius: 18px;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(12, 17, 26, .96),
+      rgba(5, 9, 16, .91)
+    );
+
+  border: 1px solid rgba(255,255,255,.12);
+
+  box-shadow:
+    0 25px 80px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.05);
+
+  backdrop-filter: blur(22px);
+
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  scrollbar-width: thin;
+}
+
+
+#timeEarthIntelligence::-webkit-scrollbar {
+  width: 4px;
+}
+
+
+#timeEarthIntelligence::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.18);
+
+  border-radius: 10px;
+}
+
+
+/* HEADER */
+
+.ei-top {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  margin-bottom: 16px;
+}
+
+
+.ei-mini {
+  font-size: 9px;
+
+  letter-spacing: .22em;
+
+  color: rgba(255,255,255,.4);
+
+  font-weight: 700;
+
+  margin-bottom: 3px;
+}
+
+
+.ei-title {
+  font-size: 16px;
+
+  letter-spacing: .08em;
+
+  font-weight: 800;
+}
+
+
+.ei-live {
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: .14em;
+
+  color: #75f6a6;
+}
+
+
+.ei-live span {
+  width: 7px;
+
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #75f6a6;
+
+  box-shadow:
+    0 0 12px #75f6a6;
+
+  animation:
+    eiPulse 1.5s infinite;
+}
+
+
+@keyframes eiPulse {
+  0%,100% {
+    opacity: .35;
+    transform: scale(.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+/* INSTRUCTION */
+
+.ei-instruction {
+  display: flex;
+
+  gap: 11px;
+
+  align-items: center;
+
+  padding: 12px;
+
+  border-radius: 12px;
+
+  background:
+    rgba(255,255,255,.045);
+
+  border:
+    1px solid rgba(255,255,255,.07);
+
+  margin-bottom: 14px;
+}
+
+
+.ei-satellite {
+  width: 34px;
+
+  height: 34px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 10px;
+
+  background:
+    rgba(115,214,255,.10);
+
+  font-size: 17px;
+}
+
+
+.ei-instruction strong {
+  display: block;
+
+  font-size: 10px;
+
+  letter-spacing: .08em;
+}
+
+
+.ei-instruction small {
+  display: block;
+
+  margin-top: 3px;
+
+  color: rgba(255,255,255,.48);
+
+  font-size: 10px;
+
+  line-height: 1.4;
+}
+
+
+/* LOCATION */
+
+.ei-location-card {
+  padding: 13px;
+
+  border-radius: 13px;
+
+  background:
+    rgba(115,214,255,.055);
+
+  border:
+    1px solid rgba(115,214,255,.13);
+
+  margin-bottom: 14px;
+}
+
+
+.ei-observed-head {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+.ei-icon {
+  width: 34px;
+
+  height: 34px;
+
+  border-radius: 50%;
+
+  display: grid;
+
+  place-items: center;
+
+  color: #73d6ff;
+
+  background:
+    rgba(115,214,255,.12);
+
+  box-shadow:
+    0 0 20px rgba(115,214,255,.12);
+}
+
+
+.ei-label,
+.ei-section-label {
+  font-size: 8px;
+
+  letter-spacing: .16em;
+
+  color: rgba(255,255,255,.38);
+
+  font-weight: 800;
+}
+
+
+.ei-observed-head strong {
+  display: block;
+
+  font-size: 13px;
+
+  margin-top: 2px;
+}
+
+
+.ei-observed-head span {
+  display: block;
+
+  margin-top: 2px;
+
+  color: rgba(255,255,255,.48);
+
+  font-size: 9px;
+}
+
+
+.ei-coordinates {
+  margin-top: 10px;
+
+  padding-top: 9px;
+
+  border-top:
+    1px solid rgba(255,255,255,.07);
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+
+  color: #73d6ff;
+
+  font-size: 10px;
+}
+
+
+/* METRICS */
+
+.ei-section-label {
+  margin-bottom: 8px;
+}
+
+
+.ei-data-grid {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 7px;
+
+  margin-bottom: 14px;
+}
+
+
+.ei-metric {
+  min-width: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 11px;
+
+  border-radius: 11px;
+
+  background:
+    rgba(255,255,255,.035);
+
+  border:
+    1px solid rgba(255,255,255,.065);
+}
+
+
+.ei-metric > span {
+  font-size: 17px;
+}
+
+
+.ei-metric small {
+  display: block;
+
+  color: rgba(255,255,255,.35);
+
+  font-size: 7px;
+
+  letter-spacing: .09em;
+
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+
+.ei-metric strong {
+  display: block;
+
+  margin-top: 3px;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+}
+
+
+/* CHART */
+
+.ei-chart-card {
+  padding: 13px;
+
+  border-radius: 13px;
+
+  background:
+    rgba(255,255,255,.035);
+
+  border:
+    1px solid rgba(255,255,255,.065);
+
+  margin-bottom: 14px;
+}
+
+
+.ei-chart-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: flex-start;
+
+  margin-bottom: 5px;
+}
+
+
+.ei-chart-header strong {
+  display: block;
+
+  font-size: 12px;
+
+  margin-top: 3px;
+}
+
+
+.ei-chart-header > span {
+  color: rgba(255,255,255,.35);
+
+  font-size: 9px;
+}
+
+
+#eiChart {
+  width: 100%;
+
+  height: 150px;
+
+  display: block;
+}
+
+
+/* INSIGHT */
+
+.ei-insight {
+  padding: 13px;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(115,214,255,.08),
+      rgba(115,214,255,.025)
+    );
+
+  border-left:
+    2px solid #73d6ff;
+
+  margin-bottom: 14px;
+}
+
+
+.ei-insight p {
+  margin: 0;
+
+  color: rgba(255,255,255,.68);
+
+  font-size: 10px;
+
+  line-height: 1.6;
+}
+
+
+/* SOURCE */
+
+.ei-source {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding-top: 12px;
+
+  border-top:
+    1px solid rgba(255,255,255,.07);
+}
+
+
+.ei-source strong {
+  display: block;
+
+  font-size: 9px;
+
+  letter-spacing: .08em;
+}
+
+
+.ei-source span {
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 8px;
+
+  color: rgba(255,255,255,.36);
+}
+
+
+.ei-source > span {
+  margin: 0;
+
+  white-space: nowrap;
+
+  font-family:
+    ui-monospace,
+    monospace;
+}
+
+
+/* PLACEHOLDER */
+
+.ei-placeholder {
+  padding: 34px 15px;
+
+  text-align: center;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+}
+
+
+.ei-placeholder-icon {
+  width: 54px;
+
+  height: 54px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 50%;
+
+  border:
+    1px solid rgba(115,214,255,.2);
+
+  color: #73d6ff;
+
+  font-size: 26px;
+
+  margin-bottom: 14px;
+
+  box-shadow:
+    0 0 30px rgba(115,214,255,.07);
+}
+
+
+.ei-placeholder strong {
+  font-size: 12px;
+}
+
+
+.ei-placeholder span {
+  max-width: 220px;
+
+  margin-top: 6px;
+
+  color: rgba(255,255,255,.4);
+
+  font-size: 10px;
+
+  line-height: 1.5;
+}
+
+
+/* LOADING */
+
+.ei-loading {
+  padding: 35px 15px;
+
+  text-align: center;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+}
+
+
+.ei-loader {
+  width: 34px;
+
+  height: 34px;
+
+  border-radius: 50%;
+
+  border:
+    2px solid rgba(255,255,255,.08);
+
+  border-top-color:
+    #73d6ff;
+
+  animation:
+    eiSpin .8s linear infinite;
+
+  margin-bottom: 14px;
+}
+
+
+@keyframes eiSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.ei-loading strong {
+  font-size: 12px;
+}
+
+
+.ei-loading span {
+  max-width: 260px;
+
+  margin-top: 6px;
+
+  color: rgba(255,255,255,.4);
+
+  font-size: 9px;
+
+  line-height: 1.5;
+}
+
+
+/* ERROR */
+
+.ei-error {
+  padding: 30px 15px;
+
+  text-align: center;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+}
+
+
+.ei-error-icon {
+  width: 38px;
+
+  height: 38px;
+
+  border-radius: 50%;
+
+  display: grid;
+
+  place-items: center;
+
+  background:
+    rgba(255,90,90,.12);
+
+  color: #ff8585;
+
+  font-weight: 900;
+
+  margin-bottom: 12px;
+}
+
+
+.ei-error strong {
+  font-size: 12px;
+}
+
+
+.ei-error span {
+  max-width: 270px;
+
+  margin: 7px 0 14px;
+
+  color: rgba(255,255,255,.42);
+
+  font-size: 9px;
+
+  line-height: 1.5;
+}
+
+
+.ei-error button {
+  border: 0;
+
+  border-radius: 8px;
+
+  padding: 8px 13px;
+
+  cursor: pointer;
+
+  color: #061018;
+
+  background: #73d6ff;
+
+  font-size: 9px;
+
+  font-weight: 800;
+}
+
+
+/* MAP MARKER */
+
+.ei-marker-wrapper {
+  background: transparent !important;
+
+  border: 0 !important;
+}
+
+
+.ei-map-marker {
+  width: 40px;
+
+  height: 40px;
+
+  position: relative;
+
+  display: grid;
+
+  place-items: center;
+}
+
+
+.ei-marker-dot {
+  width: 9px;
+
+  height: 9px;
+
+  border-radius: 50%;
+
+  background: #73d6ff;
+
+  border: 2px solid white;
+
+  box-shadow:
+    0 0 18px #73d6ff;
+}
+
+
+.ei-marker-ring {
+  position: absolute;
+
+  inset: 5px;
+
+  border-radius: 50%;
+
+  border:
+    1px solid #73d6ff;
+
+  animation:
+    eiMarkerPulse 1.5s infinite;
+}
+
+
+@keyframes eiMarkerPulse {
+  0% {
+    transform: scale(.45);
+
+    opacity: .8;
+  }
+
+  100% {
+    transform: scale(1.35);
+
+    opacity: 0;
+  }
+}
+
+
+/* MOBILE */
+
+@media (max-width: 850px) {
+
+  #timeEarthIntelligence {
+    left: 12px;
+
+    right: 12px;
+
+    top: auto;
+
+    bottom: 12px;
+
+    width: auto;
+
+    max-height: 48vh;
+  }
+
+}
+/* =========================================================
+   TIME EARTH — EARTH INTELLIGENCE
+   NASA POWER UI — FINAL OVERRIDE
+   ========================================================= */
+
+#timeEarthIntelligence {
+    position: fixed;
+
+    left: 24px;
+    top: 190px;
+
+    width: 390px;
+    max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 215px);
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    z-index: 10000;
+
+    padding: 20px;
+
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(10, 14, 20, 0.97),
+            rgba(5, 8, 13, 0.97)
+        );
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 25px 80px rgba(0,0,0,0.65),
+        0 0 0 1px rgba(255,255,255,0.025);
+
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    scrollbar-width: thin;
+    scrollbar-color:
+        rgba(255,255,255,0.18)
+        transparent;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+#timeEarthIntelligence::-webkit-scrollbar {
+    width: 5px;
+}
+
+#timeEarthIntelligence::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#timeEarthIntelligence::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.18);
+    border-radius: 20px;
+}
+
+#timeEarthIntelligence::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.28);
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+#timeEarthIntelligence .tei-header {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 18px;
+
+    padding-bottom: 16px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.08);
+}
+
+
+#timeEarthIntelligence .tei-brand {
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 3px;
+
+    color: rgba(255,255,255,0.42);
+
+    margin-bottom: 4px;
+}
+
+
+#timeEarthIntelligence .tei-title {
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    letter-spacing: -0.5px;
+
+    line-height: 1.1;
+}
+
+
+#timeEarthIntelligence .tei-live {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 6px 9px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255,255,255,0.055);
+
+    border:
+        1px solid rgba(255,255,255,0.09);
+
+    color:
+        rgba(255,255,255,0.65);
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+
+    white-space: nowrap;
+}
+
+
+#timeEarthIntelligence .tei-live::before {
+
+    content: "";
+
+    width: 5px;
+
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: #72e7a0;
+
+    box-shadow:
+        0 0 9px rgba(114,231,160,0.85);
+
+    animation:
+        teiLivePulse 1.8s infinite;
+}
+
+
+@keyframes teiLivePulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+
+}
+
+
+/* =========================================================
+   INSTRUCTION
+   ========================================================= */
+
+#timeEarthIntelligence .tei-instruction {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 14px;
+
+    padding: 10px 12px;
+
+    background:
+        rgba(255,255,255,0.035);
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    border-radius: 10px;
+
+    color:
+        rgba(255,255,255,0.48);
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.25px;
+}
+
+
+#timeEarthIntelligence .tei-crosshair {
+
+    width: 27px;
+
+    height: 27px;
+
+    flex-shrink: 0;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 8px;
+
+    background:
+        rgba(255,255,255,0.065);
+
+    color: rgba(255,255,255,0.8);
+
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+#teiContent {
+
+    margin-top: 15px;
+}
+
+
+/* =========================================================
+   EMPTY / READY
+   ========================================================= */
+
+#timeEarthIntelligence .tei-empty {
+
+    padding: 35px 20px;
+
+    text-align: center;
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,0.025);
+}
+
+
+#timeEarthIntelligence .tei-empty-icon {
+
+    width: 46px;
+
+    height: 46px;
+
+    margin: 0 auto 14px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,255,255,0.05);
+
+    border:
+        1px solid rgba(255,255,255,0.09);
+
+    color:
+        rgba(255,255,255,0.75);
+
+    font-size: 21px;
+}
+
+
+#timeEarthIntelligence .tei-empty-title {
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.7px;
+}
+
+
+#timeEarthIntelligence .tei-empty-text {
+
+    max-width: 280px;
+
+    margin: 9px auto 0;
+
+    color:
+        rgba(255,255,255,0.42);
+
+    font-size: 10px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   OBSERVATION HEADER
+   ========================================================= */
+
+#timeEarthIntelligence .tei-observation-top {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 10px;
+}
+
+
+#timeEarthIntelligence .tei-kicker {
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.7px;
+
+    color:
+        rgba(255,255,255,0.4);
+
+    margin-bottom: 5px;
+}
+
+
+#timeEarthIntelligence .tei-location {
+
+    font-size: 19px;
+
+    font-weight: 700;
+
+    letter-spacing: -0.4px;
+
+    line-height: 1.2;
+}
+
+
+#timeEarthIntelligence .tei-coordinates {
+
+    margin-top: 5px;
+
+    color:
+        rgba(255,255,255,0.42);
+
+    font-size: 9px;
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        monospace;
+
+    letter-spacing: 0.4px;
+}
+
+
+/* =========================================================
+   REAL DATA BADGE
+   ========================================================= */
+
+#timeEarthIntelligence .tei-valid-badge {
+
+    flex-shrink: 0;
+
+    padding: 6px 9px;
+
+    border-radius: 7px;
+
+    background:
+        rgba(114,231,160,0.09);
+
+    border:
+        1px solid rgba(114,231,160,0.18);
+
+    color:
+        #82e9aa;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    letter-spacing: 1.2px;
+}
+
+
+/* =========================================================
+   DATE
+   ========================================================= */
+
+#timeEarthIntelligence .tei-date {
+
+    padding: 9px 11px;
+
+    margin-bottom: 12px;
+
+    border-left:
+        2px solid rgba(255,255,255,0.35);
+
+    background:
+        rgba(255,255,255,0.025);
+
+    color:
+        rgba(255,255,255,0.42);
+
+    font-size: 9px;
+
+    line-height: 1.5;
+}
+
+
+#timeEarthIntelligence .tei-date strong {
+
+    color:
+        rgba(255,255,255,0.82);
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   METRICS
+   ========================================================= */
+
+#timeEarthIntelligence .tei-metrics {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 7px;
+
+    margin-bottom: 15px;
+}
+
+
+#timeEarthIntelligence .tei-metric {
+
+    min-height: 74px;
+
+    padding: 11px;
+
+    background:
+        rgba(255,255,255,0.035);
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    border-radius: 11px;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+#timeEarthIntelligence .tei-metric:hover {
+
+    background:
+        rgba(255,255,255,0.055);
+
+    border-color:
+        rgba(255,255,255,0.12);
+
+    transform:
+        translateY(-1px);
+}
+
+
+#timeEarthIntelligence .tei-metric-label {
+
+    color:
+        rgba(255,255,255,0.38);
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.9px;
+
+    text-transform: uppercase;
+
+    margin-bottom: 8px;
+}
+
+
+#timeEarthIntelligence .tei-metric-value {
+
+    color:
+        rgba(255,255,255,0.94);
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+    letter-spacing: -0.5px;
+}
+
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+#timeEarthIntelligence .tei-section {
+
+    margin-top: 14px;
+
+    padding-top: 14px;
+
+    border-top:
+        1px solid rgba(255,255,255,0.065);
+}
+
+
+#timeEarthIntelligence .tei-section-title {
+
+    margin-bottom: 10px;
+
+    color:
+        rgba(255,255,255,0.4);
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.8px;
+}
+
+
+/* =========================================================
+   CHART
+   ========================================================= */
+
+#timeEarthIntelligence .tei-chart-wrap {
+
+    position: relative;
+
+    width: 100%;
+
+    min-height: 170px;
+
+    padding: 5px 0 0;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,0.025),
+            rgba(255,255,255,0.008)
+        );
+
+    border:
+        1px solid rgba(255,255,255,0.055);
+
+    border-radius: 11px;
+}
+
+
+#timeEarthIntelligence #teiTemperatureChart {
+
+    display: block;
+
+    width: 100%;
+
+    height: 170px;
+}
+
+
+#timeEarthIntelligence .tei-chart-note {
+
+    margin-top: 7px;
+
+    color:
+        rgba(255,255,255,0.3);
+
+    font-size: 8px;
+
+    line-height: 1.5;
+}
+
+
+#timeEarthIntelligence .tei-chart-tooltip {
+
+    position: absolute;
+
+    display: none;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   STATISTICS
+   ========================================================= */
+
+#timeEarthIntelligence .tei-stat-grid {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 1px;
+
+    overflow: hidden;
+
+    border:
+        1px solid rgba(255,255,255,0.055);
+
+    border-radius: 10px;
+}
+
+
+#timeEarthIntelligence .tei-stat-row {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 9px 11px;
+
+    background:
+        rgba(255,255,255,0.025);
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.045);
+}
+
+
+#timeEarthIntelligence .tei-stat-row:last-child {
+
+    border-bottom: none;
+}
+
+
+#timeEarthIntelligence .tei-stat-row span {
+
+    color:
+        rgba(255,255,255,0.4);
+
+    font-size: 8px;
+
+    line-height: 1.4;
+}
+
+
+#timeEarthIntelligence .tei-stat-row strong {
+
+    color:
+        rgba(255,255,255,0.82);
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   EARTH SIGNAL
+   ========================================================= */
+
+#timeEarthIntelligence .tei-insight {
+
+    padding: 13px;
+
+    color:
+        rgba(255,255,255,0.62);
+
+    background:
+        rgba(255,255,255,0.03);
+
+    border:
+        1px solid rgba(255,255,255,0.065);
+
+    border-radius: 11px;
+
+    font-size: 10px;
+
+    line-height: 1.65;
+}
+
+
+/* =========================================================
+   DEBUG / NASA REQUEST
+   ========================================================= */
+
+#timeEarthIntelligence .tei-debug {
+
+    opacity: 0.72;
+}
+
+
+#timeEarthIntelligence .tei-request-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 6px 0;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.035);
+}
+
+
+#timeEarthIntelligence .tei-request-row:last-child {
+
+    border-bottom: none;
+}
+
+
+#timeEarthIntelligence .tei-request-row span {
+
+    color:
+        rgba(255,255,255,0.32);
+
+    font-size: 8px;
+}
+
+
+#timeEarthIntelligence .tei-request-row strong {
+
+    color:
+        rgba(255,255,255,0.58);
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        monospace;
+
+    font-size: 8px;
+
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   SOURCE
+   ========================================================= */
+
+#timeEarthIntelligence .tei-source {
+
+    margin-top: 15px;
+
+    padding-top: 13px;
+
+    border-top:
+        1px solid rgba(255,255,255,0.07);
+
+    color:
+        rgba(255,255,255,0.36);
+
+    font-size: 8px;
+
+    line-height: 1.5;
+}
+
+
+#timeEarthIntelligence .tei-source-title {
+
+    margin-bottom: 4px;
+
+    color:
+        rgba(255,255,255,0.55);
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+
+#timeEarthIntelligence .tei-source-small {
+
+    margin-top: 3px;
+
+    color:
+        rgba(255,255,255,0.25);
+
+    font-size: 7px;
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+#timeEarthIntelligence .tei-loading {
+
+    padding: 38px 20px;
+
+    text-align: center;
+
+    background:
+        rgba(255,255,255,0.025);
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    border-radius: 14px;
+}
+
+
+#timeEarthIntelligence .tei-spinner {
+
+    width: 30px;
+
+    height: 30px;
+
+    margin: 0 auto 15px;
+
+    border-radius: 50%;
+
+    border:
+        2px solid rgba(255,255,255,0.1);
+
+    border-top-color:
+        rgba(255,255,255,0.85);
+
+    animation:
+        teiSpinner 0.8s linear infinite;
+}
+
+
+@keyframes teiSpinner {
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+#timeEarthIntelligence .tei-loading-title {
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+
+#timeEarthIntelligence .tei-loading-text {
+
+    margin-top: 8px;
+
+    color:
+        rgba(255,255,255,0.4);
+
+    font-size: 9px;
+
+    line-height: 1.6;
+}
+
+
+#timeEarthIntelligence .tei-loading-text strong {
+
+    color:
+        rgba(255,255,255,0.7);
+}
+
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+#timeEarthIntelligence .tei-error {
+
+    padding: 30px 18px;
+
+    text-align: center;
+
+    background:
+        rgba(255,255,255,0.025);
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    border-radius: 14px;
+}
+
+
+#timeEarthIntelligence .tei-error-icon {
+
+    width: 42px;
+
+    height: 42px;
+
+    margin: 0 auto 13px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,100,100,0.08);
+
+    border:
+        1px solid rgba(255,100,100,0.15);
+
+    color:
+        rgba(255,130,130,0.85);
+
+    font-size: 9px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.5px;
+}
+
+
+#timeEarthIntelligence .tei-error-title {
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.4px;
+}
+
+
+#timeEarthIntelligence .tei-error-text {
+
+    margin-top: 8px;
+
+    color:
+        rgba(255,255,255,0.45);
+
+    font-size: 9px;
+
+    line-height: 1.55;
+}
+
+
+#timeEarthIntelligence .tei-error-note {
+
+    margin-top: 12px;
+
+    color:
+        rgba(255,255,255,0.28);
+
+    font-size: 8px;
+
+    line-height: 1.5;
+}
+
+
+#timeEarthIntelligence .tei-retry {
+
+    margin-top: 15px;
+
+    padding: 8px 15px;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    background:
+        rgba(255,255,255,0.9);
+
+    color:
+        #080b10;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+}
+
+
+#timeEarthIntelligence .tei-retry:hover {
+
+    transform:
+        translateY(-1px);
+
+    opacity: 0.85;
+}
+
+
+/* =========================================================
+   MAP OBSERVATION MARKER
+   ========================================================= */
+
+.time-earth-observation-marker {
+
+    stroke: rgba(255,255,255,0.95);
+
+    fill: rgba(255,255,255,0.25);
+
+    animation:
+        teiMarkerPulse 1.8s infinite;
+}
+
+
+@keyframes teiMarkerPulse {
+
+    0% {
+        stroke-width: 2;
+        opacity: 1;
+    }
+
+    50% {
+        stroke-width: 5;
+        opacity: 0.65;
+    }
+
+    100% {
+        stroke-width: 2;
+        opacity: 1;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+    #timeEarthIntelligence {
+
+        left: 12px;
+
+        right: 12px;
+
+        bottom: 12px;
+
+        top: auto;
+
+        width: auto;
+
+        max-width: none;
+
+        max-height: 52vh;
+
+        padding: 15px;
+
+        border-radius: 15px;
+    }
+
+
+    #timeEarthIntelligence .tei-title {
+
+        font-size: 16px;
+    }
+
+
+    #timeEarthIntelligence .tei-location {
+
+        font-size: 17px;
+    }
+
+
+    #timeEarthIntelligence .tei-metrics {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+    #timeEarthIntelligence {
+
+        left: 8px;
+
+        right: 8px;
+
+        bottom: 8px;
+
+        max-height: 58vh;
+
+        padding: 13px;
+    }
+
+
+    #timeEarthIntelligence .tei-metrics {
+
+        gap: 5px;
+    }
+
+
+    #timeEarthIntelligence .tei-metric {
+
+        padding: 9px;
+
+        min-height: 68px;
+    }
+
+
+    #timeEarthIntelligence .tei-metric-value {
+
+        font-size: 15px;
+    }
+
+}

@@ -1,0 +1,2176 @@
+/* =========================================================
+   TIME EARTH
+   GLOBAL
+========================================================= */
+
+:root {
+
+    --bg: #01040b;
+
+    --blue: #1687ff;
+    --cyan: #38bdf8;
+
+    --white: #f8fafc;
+    --muted: #94a3b8;
+
+    --glass: rgba(5, 20, 45, 0.65);
+    --glass-dark: rgba(1, 7, 18, 0.88);
+
+    --border: rgba(255, 255, 255, 0.12);
+    --border-blue: rgba(56, 189, 248, 0.25);
+
+    --sidebar-width: 330px;
+
+}
+
+
+* {
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+
+    margin: 0;
+    padding: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    background: var(--bg);
+
+    color: var(--white);
+
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+}
+
+
+button,
+input {
+    font: inherit;
+}
+
+
+button {
+    border: 0;
+}
+
+
+/* =========================================================
+   GENERIC
+========================================================= */
+
+.hidden {
+    display: none !important;
+}
+
+
+.page {
+    width: 100%;
+    height: 100%;
+}
+
+
+/* =========================================================
+   GLOBE PAGE
+========================================================= */
+
+.globe-page {
+
+    position: relative;
+
+    width: 100%;
+    height: 100vh;
+
+    overflow: hidden;
+
+    background:
+
+        radial-gradient(
+            circle at 50% 45%,
+            rgba(18, 73, 125, 0.30),
+            transparent 38%
+        ),
+
+        radial-gradient(
+            circle at 50% 50%,
+            rgba(3, 20, 45, 0.55),
+            transparent 65%
+        ),
+
+        #01040b;
+
+}
+
+
+.globe-container {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 1;
+
+}
+
+
+.globe-container canvas {
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+}
+
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+.navbar {
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 20;
+
+    height: 90px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 42px;
+
+    pointer-events: none;
+
+}
+
+
+.logo {
+
+    font-size: 19px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.18em;
+
+    pointer-events: auto;
+
+}
+
+
+.logo span {
+
+    color: var(--cyan);
+
+}
+
+
+.nav-search {
+
+    position: relative;
+
+    width: min(380px, 42vw);
+
+    pointer-events: auto;
+
+}
+
+
+.nav-search input {
+
+    width: 100%;
+
+    height: 48px;
+
+    padding:
+        0 18px 0 48px;
+
+    color: var(--white);
+
+    background:
+        rgba(1, 9, 21, 0.68);
+
+    border:
+        1px solid rgba(255,255,255,0.14);
+
+    border-radius: 14px;
+
+    outline: none;
+
+    backdrop-filter: blur(18px);
+
+    transition:
+        border-color .2s ease,
+        background .2s ease;
+
+}
+
+
+.nav-search input:focus {
+
+    border-color:
+        rgba(56,189,248,.55);
+
+    background:
+        rgba(3,14,29,.85);
+
+}
+
+
+.search-icon {
+
+    position: absolute;
+
+    left: 18px;
+    top: 50%;
+
+    transform:
+        translateY(-50%);
+
+    color:
+        rgba(255,255,255,.65);
+
+    font-size: 20px;
+
+    z-index: 2;
+
+}
+
+
+.search-results {
+
+    position: absolute;
+
+    top: calc(100% + 8px);
+
+    left: 0;
+    right: 0;
+
+    overflow: hidden;
+
+    border:
+        1px solid rgba(255,255,255,.12);
+
+    border-radius: 14px;
+
+    background:
+        rgba(2,10,22,.94);
+
+    backdrop-filter:
+        blur(20px);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.45);
+
+}
+
+
+.search-result {
+
+    padding: 13px 16px;
+
+    cursor: pointer;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.06);
+
+}
+
+
+.search-result:last-child {
+    border-bottom: 0;
+}
+
+
+.search-result:hover {
+
+    background:
+        rgba(56,189,248,.09);
+
+}
+
+
+.search-result-name {
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+}
+
+
+.search-result-meta {
+
+    margin-top: 3px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+
+}
+
+
+/* =========================================================
+   NASA STATUS
+========================================================= */
+
+.nasa-status {
+
+    position: absolute;
+
+    top: 105px;
+    left: 42px;
+
+    z-index: 10;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 14px;
+
+    border:
+        1px solid rgba(255,255,255,.10);
+
+    border-radius: 12px;
+
+    background:
+        rgba(1,7,18,.48);
+
+    backdrop-filter:
+        blur(14px);
+
+}
+
+
+.nasa-status-dot {
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,255,255,.30);
+
+}
+
+
+.nasa-status.active
+.nasa-status-dot {
+
+    background:
+        #38bdf8;
+
+    box-shadow:
+        0 0 14px #38bdf8;
+
+}
+
+
+.nasa-status-eyebrow {
+
+    color:
+        rgba(255,255,255,.45);
+
+    font-size: 8px;
+
+    letter-spacing:
+        .18em;
+
+}
+
+
+.nasa-status-text {
+
+    margin-top: 2px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: .04em;
+
+}
+
+
+/* =========================================================
+   LOCATION LABEL
+========================================================= */
+
+.location-label {
+
+    position: absolute;
+
+    z-index: 15;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 9px 11px;
+
+    min-width: 180px;
+
+    background:
+        rgba(1,7,18,.82);
+
+    border:
+        1px solid rgba(56,189,248,.24);
+
+    border-radius: 10px;
+
+    backdrop-filter:
+        blur(15px);
+
+    pointer-events: auto;
+
+}
+
+
+.location-dot {
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background:
+        var(--cyan);
+
+    box-shadow:
+        0 0 14px var(--cyan);
+
+}
+
+
+.location-name {
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: .08em;
+
+}
+
+
+.location-country {
+
+    margin-top: 2px;
+
+    color: var(--muted);
+
+    font-size: 10px;
+
+}
+
+
+.close-location {
+
+    margin-left: auto;
+
+    width: 24px;
+    height: 24px;
+
+    color: var(--muted);
+
+    background:
+        transparent;
+
+    cursor: pointer;
+
+    font-size: 18px;
+
+}
+
+
+/* =========================================================
+   BOTTOM GLOBE UI
+========================================================= */
+
+.bottom-ui {
+
+    position: absolute;
+
+    left: 42px;
+    right: 42px;
+    bottom: 42px;
+
+    z-index: 10;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-between;
+
+    pointer-events: none;
+
+}
+
+
+.eyebrow {
+
+    color:
+        rgba(255,255,255,.48);
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: .22em;
+
+}
+
+
+.bottom-text h1 {
+
+    margin: 10px 0 0;
+
+    font-size:
+        clamp(34px, 5vw, 70px);
+
+    line-height: .98;
+
+    letter-spacing: -.05em;
+
+}
+
+
+.bottom-text h1 span {
+
+    color:
+        rgba(255,255,255,.42);
+
+}
+
+
+.instruction {
+
+    color:
+        rgba(255,255,255,.45);
+
+    font-size: 11px;
+
+    letter-spacing: .05em;
+
+}
+
+
+.instruction span {
+    margin: 0 6px;
+}
+
+
+/* =========================================================
+   EXPLORE BUTTON
+========================================================= */
+
+.explore-location {
+
+    position: absolute;
+
+    right: 42px;
+    bottom: 45px;
+
+    z-index: 20;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+
+    padding:
+        15px 18px;
+
+    color: white;
+
+    background:
+        rgba(10,30,55,.80);
+
+    border:
+        1px solid rgba(56,189,248,.35);
+
+    border-radius: 13px;
+
+    cursor: pointer;
+
+    backdrop-filter:
+        blur(16px);
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: .13em;
+
+    transition:
+        transform .2s ease,
+        background .2s ease;
+
+}
+
+
+.explore-location:hover {
+
+    transform:
+        translateY(-2px);
+
+    background:
+        rgba(13,47,80,.95);
+
+}
+
+
+.explore-arrow {
+
+    color:
+        var(--cyan);
+
+    font-size: 20px;
+
+}
+
+
+/* =========================================================
+   LOADING OVERLAY
+========================================================= */
+
+.data-loading-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000;
+
+    display: grid;
+
+    place-items: center;
+
+    background:
+        rgba(1,4,11,.96);
+
+    backdrop-filter:
+        blur(12px);
+
+}
+
+
+.data-loading-panel {
+
+    text-align: center;
+
+}
+
+
+.data-loading-eyebrow {
+
+    color:
+        var(--cyan);
+
+    font-size: 9px;
+
+    letter-spacing: .3em;
+
+    font-weight: 800;
+
+}
+
+
+.data-loading-text {
+
+    margin-top: 15px;
+
+    color:
+        rgba(255,255,255,.82);
+
+    font-size: 13px;
+
+    letter-spacing: .08em;
+
+}
+
+
+.data-loading-dots {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    margin-top: 15px;
+
+}
+
+
+.data-loading-dots span {
+
+    animation:
+        loadingDot 1.1s infinite;
+
+    color:
+        var(--cyan);
+
+}
+
+
+.data-loading-dots span:nth-child(2) {
+    animation-delay: .15s;
+}
+
+
+.data-loading-dots span:nth-child(3) {
+    animation-delay: .3s;
+}
+
+
+@keyframes loadingDot {
+
+    0%, 100% {
+        opacity: .2;
+        transform: translateY(0);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateY(-3px);
+    }
+
+}
+
+
+/* =========================================================
+   EXPLORER
+========================================================= */
+
+.explorer-screen {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 500;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+
+    background:
+        #02050b;
+
+}
+
+
+/* =========================================================
+   EXPLORER HEADER
+========================================================= */
+
+.explorer-header {
+
+    flex:
+        0 0 78px;
+
+    display: grid;
+
+    grid-template-columns:
+        180px 1fr 180px;
+
+    align-items: center;
+
+    gap: 20px;
+
+    padding:
+        0 30px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.08);
+
+    background:
+        rgba(2,5,11,.86);
+
+    backdrop-filter:
+        blur(20px);
+
+}
+
+
+.explorer-brand {
+
+    font-size: 16px;
+
+    font-weight: 800;
+
+    letter-spacing: .17em;
+
+}
+
+
+.explorer-brand span {
+    color: var(--cyan);
+}
+
+
+.explorer-location-header {
+
+    text-align: center;
+
+}
+
+
+.explorer-location-title {
+
+    font-size: 16px;
+
+    font-weight: 800;
+
+    letter-spacing: .04em;
+
+}
+
+
+.explorer-location-meta {
+
+    margin-top: 4px;
+
+    color: var(--muted);
+
+    font-size: 10px;
+
+    letter-spacing: .06em;
+
+}
+
+
+.back-button {
+
+    justify-self: end;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 9px 12px;
+
+    color:
+        rgba(255,255,255,.65);
+
+    background:
+        transparent;
+
+    border:
+        1px solid rgba(255,255,255,.10);
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: .1em;
+
+    transition:
+        color .2s ease,
+        border-color .2s ease,
+        background .2s ease;
+
+}
+
+
+.back-button:hover {
+
+    color: white;
+
+    border-color:
+        rgba(56,189,248,.35);
+
+    background:
+        rgba(56,189,248,.05);
+
+}
+
+
+/* =========================================================
+   OBSERVATION BAR
+========================================================= */
+
+.explorer-observation-bar {
+
+    flex:
+        0 0 43px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding:
+        0 30px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.06);
+
+}
+
+
+.observation-label {
+
+    color:
+        var(--cyan);
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: .2em;
+
+}
+
+
+.observation-coordinates {
+
+    color:
+        rgba(255,255,255,.45);
+
+    font-size: 10px;
+
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        monospace;
+
+}
+
+
+/* =========================================================
+   MAIN EXPLORER
+========================================================= */
+
+.explorer-main {
+
+    flex:
+        1 1 auto;
+
+    min-height: 0;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        var(--sidebar-width);
+
+}
+
+
+/* =========================================================
+   MAP
+========================================================= */
+
+.map-stage {
+
+    position: relative;
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+
+    background:
+        #030810;
+
+}
+
+
+.nasa-map {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 1;
+
+}
+
+
+.leaflet-container {
+
+    background:
+        #030810;
+
+    font-family:
+        inherit;
+
+}
+
+
+.leaflet-control-zoom {
+
+    border:
+        1px solid rgba(255,255,255,.10) !important;
+
+}
+
+
+.leaflet-control-zoom a {
+
+    color: white !important;
+
+    background:
+        rgba(1,7,18,.80) !important;
+
+    border-bottom-color:
+        rgba(255,255,255,.08) !important;
+
+}
+
+
+.leaflet-control-attribution {
+
+    color:
+        rgba(255,255,255,.45) !important;
+
+    background:
+        rgba(1,5,12,.7) !important;
+
+}
+
+
+.leaflet-control-attribution a {
+
+    color:
+        rgba(56,189,248,.8) !important;
+
+}
+
+
+/* =========================================================
+   MAP OVERLAYS
+========================================================= */
+
+.map-title-overlay {
+
+    position: absolute;
+
+    top: 24px;
+    left: 25px;
+
+    z-index: 400;
+
+    pointer-events: none;
+
+}
+
+
+.map-eyebrow {
+
+    color:
+        rgba(255,255,255,.65);
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: .2em;
+
+}
+
+
+.map-layer-title {
+
+    margin-top: 5px;
+
+    font-size: 23px;
+
+    font-weight: 800;
+
+    letter-spacing: -.03em;
+
+}
+
+
+.map-control-button {
+
+    position: absolute;
+
+    z-index: 500;
+
+    width: 42px;
+    height: 42px;
+
+    display: grid;
+
+    place-items: center;
+
+    color: white;
+
+    background:
+        rgba(1,7,18,.78);
+
+    border:
+        1px solid rgba(255,255,255,.13);
+
+    border-radius: 11px;
+
+    cursor: pointer;
+
+    backdrop-filter:
+        blur(12px);
+
+    font-size: 19px;
+
+}
+
+
+.fullscreen-map {
+
+    top: 22px;
+    right: 22px;
+
+}
+
+
+.map-location-chip {
+
+    position: absolute;
+
+    left: 24px;
+    bottom: 23px;
+
+    z-index: 500;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding:
+        8px 11px;
+
+    background:
+        rgba(1,7,18,.78);
+
+    border:
+        1px solid rgba(255,255,255,.12);
+
+    border-radius: 9px;
+
+    backdrop-filter:
+        blur(12px);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+}
+
+
+.map-location-dot {
+
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background:
+        var(--cyan);
+
+    box-shadow:
+        0 0 12px var(--cyan);
+
+}
+
+
+.map-loading {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 600;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    background:
+        rgba(1,4,10,.38);
+
+    backdrop-filter:
+        blur(2px);
+
+    pointer-events: none;
+
+    color:
+        rgba(255,255,255,.75);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: .16em;
+
+}
+
+
+.map-loading-spinner {
+
+    width: 22px;
+    height: 22px;
+
+    border:
+        2px solid rgba(255,255,255,.15);
+
+    border-top-color:
+        var(--cyan);
+
+    border-radius: 50%;
+
+    animation:
+        spinner .7s linear infinite;
+
+}
+
+
+@keyframes spinner {
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.explorer-sidebar {
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    border-left:
+        1px solid rgba(255,255,255,.08);
+
+    background:
+        rgba(3,8,17,.96);
+
+}
+
+
+.sidebar-section {
+
+    padding:
+        24px 21px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.07);
+
+}
+
+
+.sidebar-eyebrow {
+
+    color:
+        rgba(255,255,255,.38);
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: .2em;
+
+}
+
+
+.sidebar-title {
+
+    margin-top: 7px;
+
+    color:
+        rgba(255,255,255,.88);
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   LAYER BUTTONS
+========================================================= */
+
+.layer-list {
+
+    margin-top: 15px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+}
+
+
+.layer-button {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding:
+        11px 10px;
+
+    color:
+        rgba(255,255,255,.65);
+
+    text-align: left;
+
+    background:
+        transparent;
+
+    border:
+        1px solid transparent;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease;
+
+}
+
+
+.layer-button:hover {
+
+    color: white;
+
+    background:
+        rgba(255,255,255,.035);
+
+}
+
+
+.layer-button.active {
+
+    color: white;
+
+    background:
+        rgba(56,189,248,.07);
+
+    border-color:
+        rgba(56,189,248,.18);
+
+}
+
+
+.layer-indicator {
+
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 auto;
+
+    border:
+        1px solid rgba(255,255,255,.35);
+
+    border-radius: 50%;
+
+}
+
+
+.layer-button.active .layer-indicator {
+
+    background:
+        var(--cyan);
+
+    border-color:
+        var(--cyan);
+
+    box-shadow:
+        0 0 10px rgba(56,189,248,.75);
+
+}
+
+
+.layer-button-content {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+
+}
+
+
+.layer-button strong {
+
+    font-size: 11px;
+
+}
+
+
+.layer-button small {
+
+    color:
+        rgba(255,255,255,.34);
+
+    font-size: 8px;
+
+}
+
+
+.disabled-layer {
+
+    opacity: .48;
+
+    cursor: default;
+
+}
+
+
+.disabled-layer:hover {
+
+    background: transparent;
+
+}
+
+
+/* =========================================================
+   DATE INFO
+========================================================= */
+
+.selected-date-large {
+
+    margin-top: 10px;
+
+    font-size: 22px;
+
+    font-weight: 800;
+
+    letter-spacing: -.03em;
+
+}
+
+
+.selected-date-description {
+
+    margin-top: 5px;
+
+    color:
+        var(--muted);
+
+    font-size: 9px;
+
+}
+
+
+/* =========================================================
+   ABOUT DATA
+========================================================= */
+
+.about-data-toggle {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0;
+
+    color:
+        rgba(255,255,255,.72);
+
+    background:
+        transparent;
+
+    cursor: pointer;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: .08em;
+
+}
+
+
+.about-data {
+
+    margin-top: 16px;
+
+}
+
+
+.data-row {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    padding:
+        9px 0;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.05);
+
+}
+
+
+.data-row span {
+
+    color:
+        rgba(255,255,255,.32);
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+    letter-spacing: .15em;
+
+}
+
+
+.data-row strong {
+
+    color:
+        rgba(255,255,255,.78);
+
+    font-size: 10px;
+
+}
+
+
+/* =========================================================
+   TIME MACHINE
+========================================================= */
+
+.time-machine {
+
+    flex:
+        0 0 150px;
+
+    padding:
+        20px 30px 15px;
+
+    border-top:
+        1px solid rgba(255,255,255,.08);
+
+    background:
+        rgba(2,6,13,.96);
+
+}
+
+
+.time-machine-header {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+}
+
+
+.time-machine-title {
+
+    margin-top: 5px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+}
+
+
+.timeline-current {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+}
+
+
+.timeline-current span {
+
+    color:
+        rgba(255,255,255,.32);
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+    letter-spacing: .15em;
+
+}
+
+
+.timeline-current strong {
+
+    color:
+        var(--cyan);
+
+    font-size: 12px;
+
+}
+
+
+.timeline-wrapper {
+
+    margin-top: 20px;
+
+}
+
+
+.timeline-years {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    color:
+        rgba(255,255,255,.35);
+
+    font-size: 8px;
+
+}
+
+
+.timeline-track {
+
+    position: relative;
+
+    height: 30px;
+
+    margin-top: 2px;
+
+}
+
+
+.timeline-track::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+
+    top: 50%;
+
+    height: 2px;
+
+    transform:
+        translateY(-50%);
+
+    background:
+        rgba(255,255,255,.12);
+
+}
+
+
+.timeline-progress {
+
+    position: absolute;
+
+    left: 0;
+
+    top: 50%;
+
+    height: 2px;
+
+    transform:
+        translateY(-50%);
+
+    width: 100%;
+
+    background:
+        var(--cyan);
+
+    box-shadow:
+        0 0 10px rgba(56,189,248,.45);
+
+}
+
+
+.timeline-dot {
+
+    position: absolute;
+
+    top: 50%;
+
+    left: 100%;
+
+    width: 10px;
+    height: 10px;
+
+    transform:
+        translate(-50%, -50%);
+
+    border:
+        2px solid #02060d;
+
+    border-radius: 50%;
+
+    background:
+        var(--cyan);
+
+    box-shadow:
+        0 0 14px rgba(56,189,248,.8);
+
+    pointer-events: none;
+
+}
+
+
+.timeline-track input {
+
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+
+    height: 30px;
+
+    opacity: 0;
+
+    cursor: pointer;
+
+}
+
+
+.timeline-caption {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    color:
+        rgba(255,255,255,.25);
+
+    font-size: 7px;
+
+    letter-spacing: .08em;
+
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.explorer-footer {
+
+    flex:
+        0 0 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        0 30px;
+
+    border-top:
+        1px solid rgba(255,255,255,.06);
+
+    color:
+        rgba(255,255,255,.32);
+
+    font-size: 8px;
+
+}
+
+
+.footer-eyebrow {
+
+    margin-right: 9px;
+
+    color:
+        rgba(255,255,255,.22);
+
+    letter-spacing: .12em;
+
+}
+
+
+.footer-right {
+
+    color:
+        rgba(255,255,255,.22);
+
+}
+
+
+/* =========================================================
+   FULLSCREEN MAP MODE
+========================================================= */
+
+.map-stage.map-fullscreen {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 2000;
+
+}
+
+
+.map-stage.map-fullscreen .fullscreen-map {
+
+    top: 22px;
+    right: 22px;
+
+}
+
+
+/* =========================================================
+   LEAFLET MARKER
+========================================================= */
+
+.time-earth-marker {
+
+    position: relative;
+
+    width: 20px;
+    height: 20px;
+
+}
+
+
+.time-earth-marker::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 4px;
+
+    border-radius: 50%;
+
+    background:
+        var(--cyan);
+
+    box-shadow:
+        0 0 18px var(--cyan);
+
+}
+
+
+.time-earth-marker::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    border:
+        1px solid rgba(56,189,248,.8);
+
+    border-radius: 50%;
+
+    animation:
+        markerPulse 1.8s infinite;
+
+}
+
+
+@keyframes markerPulse {
+
+    0% {
+        transform: scale(.7);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.7);
+        opacity: 0;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .navbar {
+
+        height: 72px;
+
+        padding:
+            0 18px;
+
+    }
+
+
+    .nav-search {
+
+        width: 52vw;
+
+    }
+
+
+    .nasa-status {
+
+        left: 18px;
+        top: 82px;
+
+    }
+
+
+    .bottom-ui {
+
+        left: 18px;
+        right: 18px;
+        bottom: 25px;
+
+    }
+
+
+    .instruction {
+
+        display: none;
+
+    }
+
+
+    .explore-location {
+
+        right: 18px;
+        bottom: 25px;
+
+    }
+
+
+    .explorer-header {
+
+        grid-template-columns:
+            1fr auto;
+
+        padding:
+            0 17px;
+
+    }
+
+
+    .explorer-brand {
+
+        display: none;
+
+    }
+
+
+    .explorer-location-header {
+
+        text-align: left;
+
+    }
+
+
+    .explorer-location-title {
+
+        font-size: 13px;
+
+    }
+
+
+    .explorer-main {
+
+        grid-template-columns:
+            1fr;
+
+        grid-template-rows:
+            minmax(0, 1fr)
+            auto;
+
+    }
+
+
+    .explorer-sidebar {
+
+        max-height: 285px;
+
+        border-left: 0;
+
+        border-top:
+            1px solid rgba(255,255,255,.08);
+
+    }
+
+
+    .sidebar-section {
+
+        padding:
+            17px;
+
+    }
+
+
+    .layer-list {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+
+    .time-machine {
+
+        flex-basis: 130px;
+
+        padding:
+            15px 17px 10px;
+
+    }
+
+
+    .explorer-footer {
+
+        padding:
+            0 17px;
+
+    }
+
+
+    .footer-right {
+
+        display: none;
+
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .logo {
+
+        font-size: 14px;
+
+    }
+
+
+    .nav-search {
+
+        width: 58vw;
+
+    }
+
+
+    .bottom-text h1 {
+
+        font-size: 34px;
+
+    }
+
+
+    .explore-location {
+
+        font-size: 8px;
+
+        padding:
+            12px 13px;
+
+    }
+
+
+    .explorer-observation-bar {
+
+        padding:
+            0 17px;
+
+    }
+
+
+    .map-layer-title {
+
+        font-size: 18px;
+
+    }
+
+
+    .time-machine-title {
+
+        font-size: 11px;
+
+    }
+
+
+    .timeline-current {
+
+        display: none;
+
+    }
+
+}

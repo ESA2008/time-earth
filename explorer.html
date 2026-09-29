@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TIME EARTH — Place Explorer</title>
+
+    <!-- Leaflet -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <!-- Your Explorer CSS -->
+    <link rel="stylesheet" href="explorer.css">
+</head>
+
+<body>
+
+    <!-- =========================================================
+         TOP BAR
+    ========================================================== -->
+
+    <header class="topbar">
+
+        <div class="top-left">
+
+            <button id="backButton" class="icon-button" title="Back">
+                ←
+            </button>
+
+            <div class="brand">
+                <span class="brand-mark">T</span>
+                <span>TIME EARTH</span>
+            </div>
+
+        </div>
+
+        <div class="location-header">
+
+            <div id="headerLocation" class="location-name">
+                SELECTED LOCATION
+            </div>
+
+            <div id="headerCoordinates" class="coordinates">
+                —
+            </div>
+
+        </div>
+
+        <button id="nasaAIButton" class="story-button" type="button">
+            <span>✦</span>
+            <div>
+                <strong>Ask NASA AI</strong>
+                <small>Understand this Earth data</small>
+            </div>
+            <span>→</span>
+        </button>
+
+        <div class="top-right">
+
+            <button id="fullscreenButton" class="icon-button" title="Fullscreen">
+                ⛶
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         YEAR TIMELINE
+    ========================================================== -->
+
+    <section class="timeline">
+
+        <div class="timeline-top">
+
+            <div>
+                <div class="timeline-label">
+                    EARTH OBSERVATION TIMELINE
+                </div>
+
+                <div id="timelineDate" class="timeline-date">
+                    2020
+                </div>
+            </div>
+
+            <div class="timeline-controls">
+
+                <button id="playButton" class="timeline-button">
+                    ▶
+                </button>
+
+                <button id="compareButton" class="timeline-button">
+                    COMPARE
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="timeline-slider-container">
+
+            <span class="timeline-edge">2000</span>
+
+            <input
+                type="range"
+                id="timelineSlider"
+                min="2000"
+                max="2026"
+                value="2020"
+                step="1"
+            >
+
+            <span class="timeline-edge">2026</span>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         MAIN EXPLORER
+    ========================================================== -->
+
+    <main class="explorer">
+
+        <!-- MAP -->
+
+        <section class="map-section">
+
+            <div id="map"></div>
+
+            <div class="map-overlay">
+
+                <div class="map-location">
+
+                    <span class="map-dot"></span>
+
+                    <div>
+                        <div class="map-location-label">
+                            EXPLORING
+                        </div>
+
+                        <div id="mapLocationName">
+                            SELECTED LOCATION
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Map controls -->
+
+            <div class="map-controls">
+
+                <button id="zoomIn" class="map-control">
+                    +
+                </button>
+
+                <button id="zoomOut" class="map-control">
+                    −
+                </button>
+
+            </div>
+
+
+            <!-- Loading -->
+
+            <div id="loading" class="loading">
+
+                <div class="loading-spinner"></div>
+
+                <div class="loading-text">
+                    LOADING NASA EARTH DATA
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             RIGHT PROPERTIES PANEL
+        ====================================================== -->
+
+        <aside class="properties-panel">
+
+            <div class="properties-header">
+
+                <div>
+
+                    <div class="section-eyebrow">
+                        EARTH OBSERVATION
+                    </div>
+
+                    <h1>
+                        Properties
+                    </h1>
+
+                </div>
+
+                <button id="aboutDataButton" class="small-button">
+                    DATA
+                </button>
+
+            </div>
+
+
+            <!-- LOCATION -->
+
+            <div class="property-location">
+
+                <div class="location-title">
+                    <span class="location-pin">●</span>
+
+                    <div>
+
+                        <div id="heroLocation">
+                            SELECTED LOCATION
+                        </div>
+
+                        <div id="heroRegion">
+                            —
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- DATASET -->
+
+            <div class="dataset-section">
+
+                <div class="section-eyebrow">
+                    CURRENT DATASET
+                </div>
+
+                <div class="dataset-title" id="datasetName">
+                    Corrected Reflectance
+                </div>
+
+                <div class="dataset-meta">
+
+                    <div>
+                        <span>PLATFORM</span>
+                        <strong id="currentPlatform">
+                            Terra
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>INSTRUMENT</span>
+                        <strong id="currentInstrument">
+                            MODIS
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- LAYERS -->
+
+            <div class="layers-section">
+
+                <div class="section-eyebrow">
+                    DATA LAYERS
+                </div>
+
+
+                <button
+                    class="layer-card active"
+                    data-layer="truecolor"
+                >
+
+                    <span class="layer-icon">◉</span>
+
+                    <span class="layer-content">
+                        <strong>True Color</strong>
+                        <small>Natural Earth appearance</small>
+                    </span>
+
+                    <span class="layer-arrow">→</span>
+
+                </button>
+
+
+                <button
+                    class="layer-card"
+                    data-layer="vegetation"
+                >
+
+                    <span class="layer-icon">⌁</span>
+
+                    <span class="layer-content">
+                        <strong>Vegetation</strong>
+                        <small>NDVI vegetation health</small>
+                    </span>
+
+                    <span class="layer-arrow">→</span>
+
+                </button>
+
+
+                <button
+                    class="layer-card"
+                    data-layer="temperature"
+                >
+
+                    <span class="layer-icon">°</span>
+
+                    <span class="layer-content">
+                        <strong>Temperature</strong>
+                        <small>Land surface temperature</small>
+                    </span>
+
+                    <span class="layer-arrow">→</span>
+
+                </button>
+
+
+                <button
+                    class="layer-card"
+                    data-layer="precipitation"
+                >
+
+                    <span class="layer-icon">≈</span>
+
+                    <span class="layer-content">
+                        <strong>Precipitation</strong>
+                        <small>IMERG precipitation</small>
+                    </span>
+
+                    <span class="layer-arrow">→</span>
+
+                </button>
+
+
+                <button
+                    class="layer-card"
+                    data-layer="fires"
+                >
+
+                    <span class="layer-icon">△</span>
+
+                    <span class="layer-content">
+                        <strong>Fires</strong>
+                        <small>Thermal anomalies</small>
+                    </span>
+
+                    <span class="layer-arrow">→</span>
+
+                </button>
+
+
+                <button
+                    class="layer-card"
+                    data-layer="nightlights"
+                >
+
+                    <span class="layer-icon">✦</span>
+
+                    <span class="layer-content">
+                        <strong>Night Lights</strong>
+                        <small>Human activity at night</small>
+                    </span>
+
+                    <span class="layer-arrow">→</span>
+
+                </button>
+
+
+                <button
+                    class="layer-card"
+                    data-layer="aerosols"
+                >
+
+                    <span class="layer-icon">◌</span>
+
+                    <span class="layer-content">
+                        <strong>Aerosols</strong>
+                        <small>Atmospheric particles</small>
+                    </span>
+
+                    <span class="layer-arrow">→</span>
+
+                </button>
+
+            </div>
+
+
+            <!-- LOCATION DETAILS -->
+
+            <div class="location-details">
+
+                <div class="section-eyebrow">
+                    LOCATION
+                </div>
+
+                <div class="detail-row">
+                    <span>COUNTRY</span>
+                    <strong id="infoCountry">—</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>REGION</span>
+                    <strong id="infoRegion">—</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>LATITUDE</span>
+                    <strong id="infoLatitude">—</strong>
+                </div>
+
+                <div class="detail-row">
+                    <span>LONGITUDE</span>
+                    <strong id="infoLongitude">—</strong>
+                </div>
+
+            </div>
+
+
+            <!-- STORY -->
+
+            
+
+            <button id="nasaAIButton" class="story-button" type="button">
+
+                <span>
+                    ✦
+                </span>
+
+                <div>
+                    <strong>Ask NASA AI</strong>
+                    <small>Understand this Earth data</small>
+                </div>
+
+                <span>→</span>
+
+            </button>
+
+        </aside>
+
+    </main>
+
+
+    <!-- =========================================================
+         COMPARISON
+    ========================================================== -->
+
+    <section id="comparisonSection" class="comparison-section">
+
+        <div class="comparison-header">
+
+            <div>
+
+                <div class="section-eyebrow">
+                    TIME COMPARISON
+                </div>
+
+                <h2>
+                    Then vs Now
+                </h2>
+
+            </div>
+
+            <button id="closeComparison" class="small-button">
+                CLOSE
+            </button>
+
+        </div>
+
+        <div class="comparison-grid">
+
+            <div class="comparison-card">
+
+                <span>
+                    EARLIER
+                </span>
+
+                <strong id="comparisonOldDate">
+                    —
+                </strong>
+
+            </div>
+
+            <div class="comparison-arrow">
+                →
+            </div>
+
+            <div class="comparison-card">
+
+                <span>
+                    CURRENT
+                </span>
+
+                <strong id="comparisonNewDate">
+                    —
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         DATA MODAL
+    ========================================================== -->
+
+    <div id="dataModal" class="modal">
+
+        <div class="modal-box">
+
+            <button id="closeModal" class="modal-close">
+                ×
+            </button>
+
+            <div class="section-eyebrow">
+                NASA DATA
+            </div>
+
+            <h2 id="modalDataset">
+                NASA Earth Observation
+            </h2>
+
+            <div class="modal-info">
+
+                <div>
+                    <span>TYPE</span>
+                    <strong id="modalType">—</strong>
+                </div>
+
+                <div>
+                    <span>DATE</span>
+                    <strong id="modalDate">—</strong>
+                </div>
+
+                <div>
+                    <span>PLATFORM</span>
+                    <strong id="dataPlatform">—</strong>
+                </div>
+
+                <div>
+                    <span>INSTRUMENT</span>
+                    <strong id="dataInstrument">—</strong>
+                </div>
+
+                <div>
+                    <span>PRODUCT</span>
+                    <strong id="dataProduct">—</strong>
+                </div>
+
+            </div>
+
+            <p class="modal-description">
+                TIME EARTH uses NASA Earth observation imagery
+                through NASA's Global Imagery Browse Services (GIBS).
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Leaflet -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
+    <!-- Explorer -->
+    <script src="explorer.js"></script>
+    <script src="earth-intelligence.js"></script>
+
+</body>
+</html>

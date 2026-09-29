@@ -1,0 +1,21 @@
+{
+  "name": "time-earth-modified",
+  "version": "1.0.0",
+  "description": "This package preserves the existing TIME EARTH project and adds the missing Explorer functionality instead of replacing the design.",
+  "main": "earth-intelligence.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@google/genai": "^2.24.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1",
+    "openai": "^7.24.0"
+  }
+}

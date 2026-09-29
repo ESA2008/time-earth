@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>TIME EARTH · Earth Observation</title>
+
+    <!-- Leaflet -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIINfQ3m5Zq9JX0D1M2L1M0M2N7Q5w1k7Y="
+        crossorigin=""
+    >
+
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- =========================================================
+         PAGE 1 — DISCOVER / 3D EARTH
+    ========================================================== -->
+
+    <section id="globePage" class="page globe-page">
+
+        <!-- NAVIGATION -->
+        <nav class="navbar">
+
+            <div class="logo">
+                TIME<span>EARTH</span>
+            </div>
+
+            <div class="nav-search">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                    id="locationSearch"
+                    type="search"
+                    placeholder="Search a place..."
+                    autocomplete="off"
+                >
+
+                <div
+                    id="searchResults"
+                    class="search-results"
+                ></div>
+
+            </div>
+
+        </nav>
+
+
+        <!-- 3D GLOBE -->
+        <div
+            id="globe-container"
+            class="globe-container"
+        ></div>
+
+
+        <!-- NASA STATUS -->
+        <div
+            id="nasa-status"
+            class="nasa-status"
+        >
+
+            <span class="nasa-status-dot"></span>
+
+            <div class="nasa-status-content">
+
+                <div class="nasa-status-eyebrow">
+                    NASA EARTH OBSERVATION
+                </div>
+
+                <div
+                    id="nasa-status-text"
+                    class="nasa-status-text"
+                >
+                    STANDBY
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- LOCATION LABEL -->
+        <div
+            id="location-label"
+            class="location-label hidden"
+        >
+
+            <div class="location-dot"></div>
+
+            <div class="location-label-content">
+
+                <div
+                    id="location-name"
+                    class="location-name"
+                >
+                    —
+                </div>
+
+                <div
+                    id="location-country"
+                    class="location-country"
+                >
+                    —
+                </div>
+
+            </div>
+
+            <button
+                id="closeLocation"
+                class="close-location"
+                aria-label="Clear selected location"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- BOTTOM INTRO -->
+        <div class="bottom-ui">
+
+            <div class="bottom-text">
+
+                <div class="eyebrow">
+                    NASA EARTH OBSERVATION
+                </div>
+
+                <h1>
+                    Travel through<br>
+                    <span>Earth's history.</span>
+                </h1>
+
+            </div>
+
+
+            <div class="instruction">
+
+                <span>↔</span>
+                Drag to explore
+
+                <span>·</span>
+
+                <span>⌕</span>
+                Search a place
+
+            </div>
+
+        </div>
+
+
+        <!-- EXPLORE BUTTON -->
+        <button
+            id="exploreLocation"
+            class="explore-location hidden"
+        >
+
+            <span>
+                EXPLORE THIS PLACE
+            </span>
+
+            <span class="explore-arrow">
+                →
+            </span>
+
+        </button>
+
+    </section>
+
+
+
+    <!-- =========================================================
+         NASA DATA LOADING SCREEN
+    ========================================================== -->
+
+    <div
+        id="data-loading-overlay"
+        class="data-loading-overlay hidden"
+    >
+
+        <div class="data-loading-panel">
+
+            <div class="data-loading-eyebrow">
+                TIME EARTH
+            </div>
+
+            <div
+                id="data-loading-title"
+                class="data-loading-text"
+            >
+                CONNECTING TO NASA EARTH OBSERVATION DATA
+            </div>
+
+            <div class="data-loading-dots">
+                <span>•</span>
+                <span>•</span>
+                <span>•</span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================================
+         PAGE 2 — PLACE EXPLORER
+    ========================================================== -->
+
+    <section
+        id="explorer"
+        class="explorer-screen hidden"
+    >
+
+        <!-- =====================================================
+             EXPLORER TOP BAR
+        ====================================================== -->
+
+        <header class="explorer-header">
+
+            <div class="explorer-brand">
+                TIME<span>EARTH</span>
+            </div>
+
+
+            <div class="explorer-location-header">
+
+                <div
+                    id="explorerLocation"
+                    class="explorer-location-title"
+                >
+                    —
+                </div>
+
+                <div
+                    id="explorerLocationMeta"
+                    class="explorer-location-meta"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <button
+                id="backToEarth"
+                class="back-button"
+            >
+                <span>←</span>
+                BACK TO EARTH
+            </button>
+
+        </header>
+
+
+
+        <!-- =====================================================
+             OBSERVATION BAR
+        ====================================================== -->
+
+        <div class="explorer-observation-bar">
+
+            <div class="observation-label">
+                EARTH OBSERVATION
+            </div>
+
+            <div
+                id="explorerCoordinates"
+                class="observation-coordinates"
+            >
+                —
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             MAIN EXPLORER
+        ====================================================== -->
+
+        <main class="explorer-main">
+
+
+            <!-- MAP -->
+            <section class="map-stage">
+
+                <div
+                    id="nasaMap"
+                    class="nasa-map"
+                ></div>
+
+
+                <!-- MAP TOP LABEL -->
+                <div class="map-title-overlay">
+
+                    <div class="map-eyebrow">
+                        NASA EARTH OBSERVATION
+                    </div>
+
+                    <div
+                        id="mapLayerTitle"
+                        class="map-layer-title"
+                    >
+                        TRUE COLOR
+                    </div>
+
+                </div>
+
+
+                <!-- FULLSCREEN -->
+                <button
+                    id="fullscreenMap"
+                    class="map-control-button fullscreen-map"
+                    title="Fullscreen"
+                >
+                    ⛶
+                </button>
+
+
+                <!-- MAP LOCATION -->
+                <div class="map-location-chip">
+
+                    <span class="map-location-dot"></span>
+
+                    <span id="mapLocationName">
+                        —
+                    </span>
+
+                </div>
+
+
+                <!-- MAP LOADING -->
+                <div
+                    id="mapLoading"
+                    class="map-loading hidden"
+                >
+
+                    <div class="map-loading-spinner"></div>
+
+                    <div>
+                        LOADING NASA OBSERVATION
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 DATA SIDE PANEL
+            ================================================== -->
+
+            <aside class="explorer-sidebar">
+
+
+                <!-- LAYER SWITCHER -->
+                <section class="sidebar-section">
+
+                    <div class="sidebar-eyebrow">
+                        EARTH DATA
+                    </div>
+
+                    <div class="sidebar-title">
+                        Observation layers
+                    </div>
+
+
+                    <div
+                        id="layerList"
+                        class="layer-list"
+                    >
+
+                        <button
+                            class="layer-button active"
+                            data-layer="trueColor"
+                        >
+
+                            <span class="layer-indicator"></span>
+
+                            <span class="layer-button-content">
+
+                                <strong>
+                                    True Color
+                                </strong>
+
+                                <small>
+                                    What Earth looked like
+                                </small>
+
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            class="layer-button disabled-layer"
+                            data-layer="vegetation"
+                        >
+
+                            <span class="layer-indicator"></span>
+
+                            <span class="layer-button-content">
+
+                                <strong>
+                                    Vegetation
+                                </strong>
+
+                                <small>
+                                    Coming next
+                                </small>
+
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            class="layer-button disabled-layer"
+                            data-layer="temperature"
+                        >
+
+                            <span class="layer-indicator"></span>
+
+                            <span class="layer-button-content">
+
+                                <strong>
+                                    Temperature
+                                </strong>
+
+                                <small>
+                                    Coming next
+                                </small>
+
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            class="layer-button disabled-layer"
+                            data-layer="precipitation"
+                        >
+
+                            <span class="layer-indicator"></span>
+
+                            <span class="layer-button-content">
+
+                                <strong>
+                                    Precipitation
+                                </strong>
+
+                                <small>
+                                    Coming next
+                                </small>
+
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            class="layer-button disabled-layer"
+                            data-layer="fires"
+                        >
+
+                            <span class="layer-indicator"></span>
+
+                            <span class="layer-button-content">
+
+                                <strong>
+                                    Fires
+                                </strong>
+
+                                <small>
+                                    Coming next
+                                </small>
+
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            class="layer-button disabled-layer"
+                            data-layer="nightLights"
+                        >
+
+                            <span class="layer-indicator"></span>
+
+                            <span class="layer-button-content">
+
+                                <strong>
+                                    Night Lights
+                                </strong>
+
+                                <small>
+                                    Coming next
+                                </small>
+
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            class="layer-button disabled-layer"
+                            data-layer="aerosols"
+                        >
+
+                            <span class="layer-indicator"></span>
+
+                            <span class="layer-button-content">
+
+                                <strong>
+                                    Aerosols
+                                </strong>
+
+                                <small>
+                                    Coming next
+                                </small>
+
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     DATE INFORMATION
+                ================================================== -->
+
+                <section class="sidebar-section date-section">
+
+                    <div class="sidebar-eyebrow">
+                        OBSERVATION DATE
+                    </div>
+
+                    <div
+                        id="selectedDateLarge"
+                        class="selected-date-large"
+                    >
+                        —
+                    </div>
+
+                    <div
+                        id="selectedDateDescription"
+                        class="selected-date-description"
+                    >
+                        NASA satellite observation
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     DATA ABOUT
+                ================================================== -->
+
+                <section class="sidebar-section">
+
+                    <button
+                        id="aboutDataToggle"
+                        class="about-data-toggle"
+                    >
+
+                        <span>
+                            ⓘ ABOUT THIS DATA
+                        </span>
+
+                        <span id="aboutArrow">
+                            +
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        id="aboutData"
+                        class="about-data hidden"
+                    >
+
+                        <div class="data-row">
+
+                            <span>
+                                DATASET
+                            </span>
+
+                            <strong id="dataDataset">
+                                MODIS Terra
+                            </strong>
+
+                        </div>
+
+
+                        <div class="data-row">
+
+                            <span>
+                                PLATFORM
+                            </span>
+
+                            <strong id="dataPlatform">
+                                Terra
+                            </strong>
+
+                        </div>
+
+
+                        <div class="data-row">
+
+                            <span>
+                                INSTRUMENT
+                            </span>
+
+                            <strong id="dataInstrument">
+                                MODIS
+                            </strong>
+
+                        </div>
+
+
+                        <div class="data-row">
+
+                            <span>
+                                PRODUCT
+                            </span>
+
+                            <strong id="dataProduct">
+                                Corrected Reflectance
+                            </strong>
+
+                        </div>
+
+
+                        <div class="data-row">
+
+                            <span>
+                                SERVICE
+                            </span>
+
+                            <strong>
+                                NASA GIBS
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+            </aside>
+
+        </main>
+
+
+
+        <!-- =====================================================
+             TIME MACHINE
+        ====================================================== -->
+
+        <section class="time-machine">
+
+            <div class="time-machine-header">
+
+                <div>
+
+                    <div class="sidebar-eyebrow">
+                        TIME MACHINE
+                    </div>
+
+                    <div class="time-machine-title">
+                        Travel through the observation record
+                    </div>
+
+                </div>
+
+
+                <div class="timeline-current">
+
+                    <span>
+                        OBSERVATION
+                    </span>
+
+                    <strong id="timelineDate">
+                        —
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="timeline-wrapper">
+
+                <div class="timeline-years">
+
+                    <span>
+                        2000
+                    </span>
+
+                    <span>
+                        2005
+                    </span>
+
+                    <span>
+                        2010
+                    </span>
+
+                    <span>
+                        2015
+                    </span>
+
+                    <span>
+                        2020
+                    </span>
+
+                    <span>
+                        2026
+                    </span>
+
+                </div>
+
+
+                <div class="timeline-track">
+
+                    <div
+                        id="timelineProgress"
+                        class="timeline-progress"
+                    ></div>
+
+                    <div
+                        id="timelineDot"
+                        class="timeline-dot"
+                    ></div>
+
+                    <input
+                        id="timelineSlider"
+                        type="range"
+                        min="2000"
+                        max="2026"
+                        step="1"
+                        value="2026"
+                        aria-label="Observation year"
+                    >
+
+                </div>
+
+
+                <div class="timeline-caption">
+
+                    <span>
+                        Historical observation
+                    </span>
+
+                    <span id="timelineYear">
+                        2026
+                    </span>
+
+                    <span>
+                        Latest selected year
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =====================================================
+             DATA CREDIT
+        ====================================================== -->
+
+        <footer class="explorer-footer">
+
+            <div>
+
+                <span class="footer-eyebrow">
+                    IMAGERY & VISUALIZATION DATA
+                </span>
+
+                <strong>
+                    NASA Global Imagery Browse Services (GIBS)
+                </strong>
+
+            </div>
+
+
+            <div class="footer-right">
+
+                NASA Earth Science Data Systems
+
+            </div>
+
+        </footer>
+
+    </section>
+
+
+
+    <!-- =========================================================
+         SCRIPTS
+    ========================================================== -->
+
+    <!-- Three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+
+    <!-- Leaflet -->
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+    ></script>
+
+
+    <!-- Your main JavaScript -->
+    <script src="script.js"></script>
+
+</body>
+</html>
