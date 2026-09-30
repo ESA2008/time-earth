@@ -12,8 +12,13 @@ const PORT = process.env.PORT || 3000;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const FIRMS_MAP_KEY = process.env.FIRMS_MAP_KEY;
 
+const GEMINI_MODEL =
+  process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+
 if (!GEMINI_API_KEY) {
-  throw new Error("GEMINI_API_KEY is missing from .env");
+  throw new Error(
+    "GEMINI_API_KEY is missing from .env"
+  );
 }
 
 const ai = new GoogleGenAI({
@@ -21,343 +26,20 @@ const ai = new GoogleGenAI({
 });
 
 app.use(cors());
-app.use(express.json({ limit: "2mb" }));
 
-const GEMINI_MODEL =
-  process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+app.use(
+  express.json({
+    limit: "2mb",
+  })
+);
 
 /* =========================================================
    CACHE
 ========================================================= */
 
-const powerCache = new Map();
-const firmsCache = new Map();
-const geocodeCache = new Map();
+const cache = new Map();
 
-const POWER_CACHE_TTL = 1000 * 60 * 60 * 6;
-const FIRMS_CACHE_TTL = 1000 * 60 * 60 * 24;
-const GEOCODE_CACHE_TTL = 1000 * 60 * 60 * 24 * 30;
-
-/* =========================================================
-   KNOWN LOCATIONS
-========================================================= */
-
-const KNOWN_LOCATIONS = {
-  "bahir dar": {
-    name: "Bahir Dar",
-    country: "Ethiopia",
-    region: "Amhara",
-    latitude: 11.5742,
-    longitude: 37.3614,
-  },
-
-  "nairobi": {
-    name: "Nairobi",
-    country: "Kenya",
-    region: "Nairobi County",
-    latitude: -1.2864,
-    longitude: 36.8172,
-  },
-
-  "addis ababa": {
-    name: "Addis Ababa",
-    country: "Ethiopia",
-    region: "Addis Ababa",
-    latitude: 8.9806,
-    longitude: 38.7578,
-  },
-
-  "gondar": {
-    name: "Gondar",
-    country: "Ethiopia",
-    region: "Amhara",
-    latitude: 12.603,
-    longitude: 37.4521,
-  },
-
-  "hawassa": {
-    name: "Hawassa",
-    country: "Ethiopia",
-    region: "Sidama",
-    latitude: 7.0621,
-    longitude: 38.4765,
-  },
-
-  "mekelle": {
-    name: "Mekelle",
-    country: "Ethiopia",
-    region: "Tigray",
-    latitude: 13.4967,
-    longitude: 39.4767,
-  },
-
-  "delhi": {
-    name: "Delhi",
-    country: "India",
-    region: "Delhi",
-    latitude: 28.6139,
-    longitude: 77.209,
-  },
-
-  "new delhi": {
-    name: "New Delhi",
-    country: "India",
-    region: "Delhi",
-    latitude: 28.6139,
-    longitude: 77.209,
-  },
-
-  "kampala": {
-    name: "Kampala",
-    country: "Uganda",
-    region: "Central Region",
-    latitude: 0.3476,
-    longitude: 32.5825,
-  },
-
-  "dar es salaam": {
-    name: "Dar es Salaam",
-    country: "Tanzania",
-    region: "Dar es Salaam",
-    latitude: -6.7924,
-    longitude: 39.2083,
-  },
-
-  "cairo": {
-    name: "Cairo",
-    country: "Egypt",
-    region: "Cairo",
-    latitude: 30.0444,
-    longitude: 31.2357,
-  },
-
-  "lagos": {
-    name: "Lagos",
-    country: "Nigeria",
-    region: "Lagos",
-    latitude: 6.5244,
-    longitude: 3.3792,
-  },
-
-  "johannesburg": {
-    name: "Johannesburg",
-    country: "South Africa",
-    region: "Gauteng",
-    latitude: -26.2041,
-    longitude: 28.0473,
-  },
-
-  "sao paulo": {
-    name: "São Paulo",
-    country: "Brazil",
-    region: "São Paulo",
-    latitude: -23.5505,
-    longitude: -46.6333,
-  },
-
-  "atalaia do norte": {
-    name: "Atalaia do Norte",
-    country: "Brazil",
-    region: "Amazonas",
-    latitude: -4.373,
-    longitude: -70.192,
-  },
-};
-
-/* =========================================================
-   COUNTRY REPRESENTATIVE LOCATIONS
-========================================================= */
-
-const COUNTRY_LOCATIONS = {
-  ethiopia: {
-    name: "Ethiopia",
-    country: "Ethiopia",
-    latitude: 9.145,
-    longitude: 40.4897,
-  },
-
-  kenya: {
-    name: "Kenya",
-    country: "Kenya",
-    latitude: -0.0236,
-    longitude: 37.9062,
-  },
-
-  india: {
-    name: "India",
-    country: "India",
-    latitude: 20.5937,
-    longitude: 78.9629,
-  },
-
-  brazil: {
-    name: "Brazil",
-    country: "Brazil",
-    latitude: -14.235,
-    longitude: -51.9253,
-  },
-
-  uganda: {
-    name: "Uganda",
-    country: "Uganda",
-    latitude: 1.3733,
-    longitude: 32.2903,
-  },
-
-  tanzania: {
-    name: "Tanzania",
-    country: "Tanzania",
-    latitude: -6.369,
-    longitude: 34.8888,
-  },
-
-  nigeria: {
-    name: "Nigeria",
-    country: "Nigeria",
-    latitude: 9.082,
-    longitude: 8.6753,
-  },
-
-  egypt: {
-    name: "Egypt",
-    country: "Egypt",
-    latitude: 26.8206,
-    longitude: 30.8025,
-  },
-
-  "south africa": {
-    name: "South Africa",
-    country: "South Africa",
-    latitude: -30.5595,
-    longitude: 22.9375,
-  },
-};
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function isNumber(value) {
-  return (
-    typeof value === "number" &&
-    Number.isFinite(value)
-  );
-}
-
-function round(value, decimals = 2) {
-  if (!isNumber(value)) {
-    return null;
-  }
-
-  return Number(value.toFixed(decimals));
-}
-
-function average(values) {
-  const valid = values.filter(isNumber);
-
-  if (!valid.length) {
-    return null;
-  }
-
-  return (
-    valid.reduce(
-      (total, value) => total + value,
-      0
-    ) / valid.length
-  );
-}
-
-function sum(values) {
-  const valid = values.filter(isNumber);
-
-  if (!valid.length) {
-    return null;
-  }
-
-  return valid.reduce(
-    (total, value) => total + value,
-    0
-  );
-}
-
-function correlation(xValues, yValues) {
-  const pairs = [];
-
-  for (let i = 0; i < xValues.length; i++) {
-    if (
-      isNumber(xValues[i]) &&
-      isNumber(yValues[i])
-    ) {
-      pairs.push([
-        xValues[i],
-        yValues[i],
-      ]);
-    }
-  }
-
-  if (pairs.length < 3) {
-    return null;
-  }
-
-  const xMean = average(
-    pairs.map(pair => pair[0])
-  );
-
-  const yMean = average(
-    pairs.map(pair => pair[1])
-  );
-
-  let numerator = 0;
-  let xVariance = 0;
-  let yVariance = 0;
-
-  for (const [x, y] of pairs) {
-    const dx = x - xMean;
-    const dy = y - yMean;
-
-    numerator += dx * dy;
-    xVariance += dx * dx;
-    yVariance += dy * dy;
-  }
-
-  if (
-    xVariance === 0 ||
-    yVariance === 0
-  ) {
-    return null;
-  }
-
-  return round(
-    numerator /
-      Math.sqrt(
-        xVariance * yVariance
-      ),
-    3
-  );
-}
-
-function percentChange(oldValue, newValue) {
-  if (
-    !isNumber(oldValue) ||
-    !isNumber(newValue) ||
-    oldValue === 0
-  ) {
-    return null;
-  }
-
-  return round(
-    ((newValue - oldValue) /
-      Math.abs(oldValue)) *
-      100,
-    2
-  );
-}
-
-/* =========================================================
-   CACHE HELPERS
-========================================================= */
-
-function getCache(cache, key, ttl) {
+function getCache(key, ttl = 3600000) {
   const item = cache.get(key);
 
   if (!item) {
@@ -365,7 +47,7 @@ function getCache(cache, key, ttl) {
   }
 
   if (
-    Date.now() - item.timestamp >
+    Date.now() - item.time >
     ttl
   ) {
     cache.delete(key);
@@ -375,11 +57,51 @@ function getCache(cache, key, ttl) {
   return item.value;
 }
 
-function setCache(cache, key, value) {
+function setCache(key, value) {
   cache.set(key, {
-    timestamp: Date.now(),
+    time: Date.now(),
     value,
   });
+}
+
+/* =========================================================
+   QUESTION CLASSIFICATION
+========================================================= */
+
+function isEarthQuestion(question) {
+  return /\b(earth|land|soil|rain|rainfall|precipitation|temperature|weather|climate|humidity|wind|vegetation|forest|ocean|sea|lake|river|drought|flood|agriculture|crop|fire|fires|wildfire|wildfires|hotspot|hotspots|burning|burned|smoke|air quality|atmosphere|surface|satellite image|imagery|land cover|land use|snow|ice|glacier|water)\b/i.test(
+    question
+  );
+}
+
+function isFireQuestion(question) {
+  return /\b(fire|fires|wildfire|wildfires|hotspot|hotspots|active fire|thermal anomaly|thermal anomalies|FIRMS|FRP|fire radiative power|burning|burned)\b/i.test(
+    question
+  );
+}
+
+function isWeatherQuestion(question) {
+  return /\b(temperature|rainfall|precipitation|humidity|wind|weather|climate|drought|solar radiation|solar|evaporation|pressure)\b/i.test(
+    question
+  );
+}
+
+function isDatasetQuestion(question) {
+  return /\b(dataset|data|measurement|measure|parameter|product|collection|resolution|spatial resolution|temporal resolution|instrument|sensor|band|bands|spectral|observation)\b/i.test(
+    question
+  );
+}
+
+function isSatelliteQuestion(question) {
+  return /\b(satellite|satellites|orbit|orbital|instrument|sensor|Landsat|Sentinel|MODIS|VIIRS|GOES|Terra|Aqua|Suomi|NOAA|ICESat|GRACE|SMAP|GEDI|ECOSTRESS)\b/i.test(
+    question
+  );
+}
+
+function isSpaceQuestion(question) {
+  return /\b(Mars|Moon|Luna|Venus|Jupiter|Saturn|Mercury|Neptune|Uranus|Pluto|asteroid|comet|galaxy|galaxies|star|stars|exoplanet|black hole|nebula|universe|solar system|Sun|sun|planet|planets|space|cosmos|James Webb|Hubble|Roman|Chandra|Spitzer)\b/i.test(
+    question
+  );
 }
 
 /* =========================================================
@@ -396,112 +118,173 @@ function extractYears(question) {
     ...new Set(
       matches.map(Number)
     ),
-  ].filter(
-    year =>
-      year >= 1981 &&
-      year <=
-        new Date().getFullYear()
-  );
+  ];
 }
 
 function extractYearRange(question) {
-  const years = extractYears(question);
+  const years =
+    extractYears(question);
 
   if (years.length < 2) {
     return null;
   }
 
-  const start = Math.min(...years);
-  const end = Math.max(...years);
+  const start =
+    Math.min(...years);
 
-  const fullRange = [];
+  const end =
+    Math.max(...years);
+
+  const result = [];
 
   for (
     let year = start;
     year <= end;
     year++
   ) {
-    fullRange.push(year);
+    result.push(year);
   }
 
   return {
     start,
     end,
-    years: fullRange,
+    years: result,
   };
 }
 
 /* =========================================================
-   QUESTION CLASSIFICATION
+   LOCATION EXTRACTION
 ========================================================= */
 
-function isFireQuestion(question) {
-  return /\b(fire|fires|wildfire|wildfires|hotspot|hotspots|active fire|thermal anomaly|thermal anomalies|thermal detection|thermal detections|FIRMS|FRP|fire radiative power|burning|burned)\b/i.test(
-    question
-  );
-}
+const knownLocations = {
+  "bahir dar": {
+    name: "Bahir Dar",
+    country: "Ethiopia",
+    latitude: 11.5742,
+    longitude: 37.3614,
+  },
 
-function isClimateQuestion(question) {
-  return /\b(temperature|rainfall|precipitation|humidity|wind|climate|weather|wet|dry|drought|heat|solar|radiation)\b/i.test(
-    question
-  );
-}
+  nairobi: {
+    name: "Nairobi",
+    country: "Kenya",
+    latitude: -1.2864,
+    longitude: 36.8172,
+  },
 
-function isComparisonQuestion(question) {
-  return /\b(compare|comparison|versus|vs|between|difference|higher|lower|more|less|greatest|highest|lowest|change|changed|trend|relationship|correlated|correlation)\b/i.test(
-    question
-  );
-}
+  "addis ababa": {
+    name: "Addis Ababa",
+    country: "Ethiopia",
+    latitude: 8.9806,
+    longitude: 38.7578,
+  },
 
-/* =========================================================
-   LOCATION DETECTION
-========================================================= */
+  gondar: {
+    name: "Gondar",
+    country: "Ethiopia",
+    latitude: 12.603,
+    longitude: 37.4521,
+  },
+
+  hawassa: {
+    name: "Hawassa",
+    country: "Ethiopia",
+    latitude: 7.0621,
+    longitude: 38.4765,
+  },
+
+  mekelle: {
+    name: "Mekelle",
+    country: "Ethiopia",
+    latitude: 13.4967,
+    longitude: 39.4767,
+  },
+
+  delhi: {
+    name: "Delhi",
+    country: "India",
+    latitude: 28.6139,
+    longitude: 77.209,
+  },
+
+  "new delhi": {
+    name: "New Delhi",
+    country: "India",
+    latitude: 28.6139,
+    longitude: 77.209,
+  },
+
+  lagos: {
+    name: "Lagos",
+    country: "Nigeria",
+    latitude: 6.5244,
+    longitude: 3.3792,
+  },
+
+  cairo: {
+    name: "Cairo",
+    country: "Egypt",
+    latitude: 30.0444,
+    longitude: 31.2357,
+  },
+
+  kampala: {
+    name: "Kampala",
+    country: "Uganda",
+    latitude: 0.3476,
+    longitude: 32.5825,
+  },
+
+  "dar es salaam": {
+    name: "Dar es Salaam",
+    country: "Tanzania",
+    latitude: -6.7924,
+    longitude: 39.2083,
+  },
+
+  johannesburg: {
+    name: "Johannesburg",
+    country: "South Africa",
+    latitude: -26.2041,
+    longitude: 28.0473,
+  },
+
+  "sao paulo": {
+    name: "São Paulo",
+    country: "Brazil",
+    latitude: -23.5505,
+    longitude: -46.6333,
+  },
+
+  "atalaia do norte": {
+    name: "Atalaia do Norte",
+    country: "Brazil",
+    latitude: -4.373,
+    longitude: -70.192,
+  },
+};
 
 function findKnownLocations(question) {
   const lower =
     question.toLowerCase();
 
-  const found = [];
+  const results = [];
 
-  for (const [
-    key,
-    location,
-  ] of Object.entries(
-    KNOWN_LOCATIONS
-  )) {
+  for (
+    const [
+      key,
+      location,
+    ] of Object.entries(
+      knownLocations
+    )
+  ) {
     if (
       lower.includes(key)
     ) {
-      found.push({
-        ...location,
-        matchedText: key,
-      });
+      results.push(location);
     }
   }
 
-  return found;
-}
-
-function findKnownCountries(question) {
-  const lower =
-    question.toLowerCase();
-
-  const found = [];
-
-  for (const [
-    key,
-    location,
-  ] of Object.entries(
-    COUNTRY_LOCATIONS
-  )) {
-    if (
-      lower.includes(key)
-    ) {
-      found.push(location);
-    }
-  }
-
-  return found;
+  return results;
 }
 
 /* =========================================================
@@ -509,56 +292,39 @@ function findKnownCountries(question) {
 ========================================================= */
 
 async function geocodeLocation(
-  locationText
+  place
 ) {
-  const cacheKey =
-    locationText
-      .toLowerCase()
-      .trim();
+  const key =
+    place.toLowerCase().trim();
 
-  const cached = getCache(
-    geocodeCache,
-    cacheKey,
-    GEOCODE_CACHE_TTL
-  );
+  const cached =
+    getCache(
+      `geo:${key}`,
+      1000 * 60 * 60 * 24 * 30
+    );
 
   if (cached) {
     return cached;
   }
 
   if (
-    KNOWN_LOCATIONS[
-      cacheKey
-    ]
+    knownLocations[key]
   ) {
-    const result =
-      KNOWN_LOCATIONS[
-        cacheKey
-      ];
-
-    setCache(
-      geocodeCache,
-      cacheKey,
-      result
-    );
-
-    return result;
+    return knownLocations[key];
   }
 
   try {
     const url =
       "https://nominatim.openstreetmap.org/search" +
-      "?format=jsonv2" +
-      "&limit=1" +
-      `&q=${encodeURIComponent(
-        locationText
+      `?format=jsonv2&limit=1&q=${encodeURIComponent(
+        place
       )}`;
 
     const response =
       await fetch(url, {
         headers: {
           "User-Agent":
-            "TIME-EARTH/1.0",
+            "TIME-EARTH-NASA-AI/1.0",
         },
       });
 
@@ -569,11 +335,10 @@ async function geocodeLocation(
     const data =
       await response.json();
 
-    if (!Array.isArray(data)) {
-      return null;
-    }
-
-    if (!data.length) {
+    if (
+      !Array.isArray(data) ||
+      !data.length
+    ) {
       return null;
     }
 
@@ -583,7 +348,7 @@ async function geocodeLocation(
       name:
         item.display_name
           ?.split(",")[0] ||
-        locationText,
+        place,
 
       country:
         item.address?.country ||
@@ -591,7 +356,6 @@ async function geocodeLocation(
 
       region:
         item.address?.state ||
-        item.address?.region ||
         "",
 
       latitude:
@@ -602,10 +366,10 @@ async function geocodeLocation(
     };
 
     if (
-      !isNumber(
+      !Number.isFinite(
         result.latitude
       ) ||
-      !isNumber(
+      !Number.isFinite(
         result.longitude
       )
     ) {
@@ -613,135 +377,138 @@ async function geocodeLocation(
     }
 
     setCache(
-      geocodeCache,
-      cacheKey,
+      `geo:${key}`,
       result
     );
 
     return result;
-  } catch (error) {
-    console.error(
-      "Geocoding error:",
-      error.message
-    );
-
+  } catch {
     return null;
   }
 }
 
 /* =========================================================
-   DETERMINE YEARS
+   FIND POSSIBLE PLACE NAMES
 ========================================================= */
 
-function determineYears(
+async function findQuestionLocations(
   question,
-  explorerYear
+  pageLocation
 ) {
-  const range =
-    extractYearRange(
+  const known =
+    findKnownLocations(
       question
     );
 
-  if (range) {
-    return range.years;
+  if (known.length) {
+    return known;
   }
 
-  const explicit =
-    extractYears(
-      question
-    );
+  /*
+    Try common natural-language forms:
 
-  if (explicit.length) {
-    return explicit;
+    "weather in Tokyo"
+    "fires around Amazon"
+    "temperature at Nairobi"
+  */
+
+  const patterns = [
+    /\b(?:in|at|around|near|over|for)\s+([A-Z][A-Za-zÀ-ÿ]+(?:\s+[A-Z][A-Za-zÀ-ÿ]+){0,4})/,
+    /\b(?:of)\s+([A-Z][A-Za-zÀ-ÿ]+(?:\s+[A-Z][A-Za-zÀ-ÿ]+){0,4})/,
+  ];
+
+  for (
+    const pattern of patterns
+  ) {
+    const match =
+      question.match(pattern);
+
+    if (match) {
+      const result =
+        await geocodeLocation(
+          match[1]
+        );
+
+      if (result) {
+        return [result];
+      }
+    }
   }
 
-  const lower =
-    question.toLowerCase();
+  /*
+    IMPORTANT:
+    Page location is ONLY a fallback.
 
-  const currentYear =
-    Number(explorerYear) ||
-    new Date().getFullYear();
+    It is NOT allowed to override an explicit
+    location in the user's question.
+  */
 
   if (
-    lower.includes(
-      "past 10 years"
-    ) ||
-    lower.includes(
-      "last 10 years"
-    ) ||
-    lower.includes(
-      "previous 10 years"
+    pageLocation &&
+    Number.isFinite(
+      Number(
+        pageLocation.latitude
+      )
+    ) &&
+    Number.isFinite(
+      Number(
+        pageLocation.longitude
+      )
     )
   ) {
-    const years = [];
+    return [
+      {
+        name:
+          pageLocation.name ||
+          "Current map location",
 
-    for (
-      let i = 9;
-      i >= 0;
-      i--
-    ) {
-      years.push(
-        currentYear - i
-      );
-    }
+        country:
+          pageLocation.country ||
+          "",
 
-    return years;
+        region:
+          pageLocation.region ||
+          "",
+
+        latitude:
+          Number(
+            pageLocation.latitude
+          ),
+
+        longitude:
+          Number(
+            pageLocation.longitude
+          ),
+      },
+    ];
   }
 
-  if (
-    lower.includes(
-      "past five years"
-    ) ||
-    lower.includes(
-      "past 5 years"
-    ) ||
-    lower.includes(
-      "last five years"
-    ) ||
-    lower.includes(
-      "last 5 years"
-    )
-  ) {
-    const years = [];
-
-    for (
-      let i = 4;
-      i >= 0;
-      i--
-    ) {
-      years.push(
-        currentYear - i
-      );
-    }
-
-    return years;
-  }
-
-  return [currentYear];
+  return [];
 }
 
 /* =========================================================
    NASA POWER
 ========================================================= */
 
-async function getNASAPowerData(
+async function getPower(
   latitude,
   longitude,
   startYear,
   endYear
 ) {
-  const key = [
-    round(latitude, 4),
-    round(longitude, 4),
-    startYear,
-    endYear,
-  ].join(":");
+  const key =
+    [
+      "power",
+      latitude.toFixed(4),
+      longitude.toFixed(4),
+      startYear,
+      endYear,
+    ].join(":");
 
   const cached =
     getCache(
-      powerCache,
       key,
-      POWER_CACHE_TTL
+      1000 * 60 * 60 * 12
     );
 
   if (cached) {
@@ -773,60 +540,34 @@ async function getNASAPowerData(
 
   if (!response.ok) {
     throw new Error(
-      `NASA POWER request failed: ${response.status}`
+      `NASA POWER failed: ${response.status}`
     );
   }
 
   const data =
     await response.json();
 
-  const result =
-    summarizePowerData(
-      data
-    );
+  const annual = {};
 
-  setCache(
-    powerCache,
-    key,
-    result
-  );
+  const temperature =
+    data?.properties?.parameter
+      ?.T2M || {};
 
-  return result;
-}
-
-/* =========================================================
-   SUMMARIZE NASA POWER
-========================================================= */
-
-function summarizePowerData(
-  data
-) {
-  const parameters =
-    data?.properties?.parameter;
-
-  if (!parameters) {
-    throw new Error(
-      "NASA POWER returned no parameter data."
-    );
-  }
-
-  const dates = Object.keys(
-    parameters.T2M || {}
-  );
-
-  const yearly = {};
-
-  for (const date of dates) {
+  for (
+    const date of Object.keys(
+      temperature
+    )
+  ) {
     const year =
       Number(
-        date.substring(0, 4)
+        date.slice(0, 4)
       );
 
-    if (!yearly[year]) {
-      yearly[year] = {
+    if (!annual[year]) {
+      annual[year] = {
         temperature: [],
-        maximumTemperature: [],
-        minimumTemperature: [],
+        maximum: [],
+        minimum: [],
         precipitation: [],
         humidity: [],
         wind: [],
@@ -834,79 +575,152 @@ function summarizePowerData(
       };
     }
 
-    const row =
-      yearly[year];
+    const p =
+      data.properties.parameter;
 
     const values = {
       temperature:
+        Number(p.T2M?.[date]),
+
+      maximum:
         Number(
-          parameters.T2M?.[date]
+          p.T2M_MAX?.[date]
         ),
 
-      maximumTemperature:
+      minimum:
         Number(
-          parameters.T2M_MAX?.[date]
-        ),
-
-      minimumTemperature:
-        Number(
-          parameters.T2M_MIN?.[date]
+          p.T2M_MIN?.[date]
         ),
 
       precipitation:
         Number(
-          parameters.PRECTOTCORR?.[date]
+          p.PRECTOTCORR?.[date]
         ),
 
       humidity:
         Number(
-          parameters.RH2M?.[date]
+          p.RH2M?.[date]
         ),
 
       wind:
         Number(
-          parameters.WS2M?.[date]
+          p.WS2M?.[date]
         ),
 
       solar:
         Number(
-          parameters.ALLSKY_SFC_SW_DWN?.[
+          p.ALLSKY_SFC_SW_DWN?.[
             date
           ]
         ),
     };
 
-    for (const [
-      key,
-      value,
-    ] of Object.entries(
-      values
-    )) {
-      if (isNumber(value)) {
-        row[key].push(value);
-      }
+    if (
+      Number.isFinite(
+        values.temperature
+      )
+    ) {
+      annual[
+        year
+      ].temperature.push(
+        values.temperature
+      );
+    }
+
+    if (
+      Number.isFinite(
+        values.maximum
+      )
+    ) {
+      annual[
+        year
+      ].maximum.push(
+        values.maximum
+      );
+    }
+
+    if (
+      Number.isFinite(
+        values.minimum
+      )
+    ) {
+      annual[
+        year
+      ].minimum.push(
+        values.minimum
+      );
+    }
+
+    if (
+      Number.isFinite(
+        values.precipitation
+      )
+    ) {
+      annual[
+        year
+      ].precipitation.push(
+        values.precipitation
+      );
+    }
+
+    if (
+      Number.isFinite(
+        values.humidity
+      )
+    ) {
+      annual[
+        year
+      ].humidity.push(
+        values.humidity
+      );
+    }
+
+    if (
+      Number.isFinite(
+        values.wind
+      )
+    ) {
+      annual[
+        year
+      ].wind.push(
+        values.wind
+      );
+    }
+
+    if (
+      Number.isFinite(
+        values.solar
+      )
+    ) {
+      annual[
+        year
+      ].solar.push(
+        values.solar
+      );
     }
   }
 
-  const annual = {};
+  const result = {};
 
-  for (const [
-    year,
-    values,
-  ] of Object.entries(
-    yearly
-  )) {
+  for (
+    const [
+      year,
+      values,
+    ] of Object.entries(
+      annual
+    )
+  ) {
     const avgMax =
       average(
-        values.maximumTemperature
+        values.maximum
       );
 
     const avgMin =
       average(
-        values.minimumTemperature
+        values.minimum
       );
 
-    annual[year] = {
+    result[year] = {
       year: Number(year),
 
       averageTemperatureC:
@@ -923,8 +737,12 @@ function summarizePowerData(
         round(avgMin),
 
       diurnalTemperatureRangeC:
-        isNumber(avgMax) &&
-        isNumber(avgMin)
+        Number.isFinite(
+          avgMax
+        ) &&
+        Number.isFinite(
+          avgMin
+        )
           ? round(
               avgMax - avgMin
             )
@@ -937,7 +755,7 @@ function summarizePowerData(
           )
         ),
 
-      averageRelativeHumidityPercent:
+      averageHumidityPercent:
         round(
           average(
             values.humidity
@@ -960,290 +778,78 @@ function summarizePowerData(
     };
   }
 
-  return {
-    source: "NASA POWER",
-    dataset:
-      "Daily Point Data",
-    annual,
-  };
-}
-
-/* =========================================================
-   POWER ANALYSIS
-========================================================= */
-
-function analyzePower(
-  power
-) {
-  const rows =
-    Object.values(
-      power?.annual || {}
-    ).sort(
-      (a, b) =>
-        a.year - b.year
-    );
-
-  if (!rows.length) {
-    return {
-      annualRows: [],
-    };
-  }
-
-  const precipitationRows =
-    rows.filter(
-      row =>
-        isNumber(
-          row.totalPrecipitationMm
-        )
-    );
-
-  const temperatureRows =
-    rows.filter(
-      row =>
-        isNumber(
-          row.averageTemperatureC
-        )
-    );
-
-  const highestPrecipitation =
-    precipitationRows.length
-      ? precipitationRows.reduce(
-          (a, b) =>
-            b.totalPrecipitationMm >
-            a.totalPrecipitationMm
-              ? b
-              : a
-        )
-      : null;
-
-  const lowestPrecipitation =
-    precipitationRows.length
-      ? precipitationRows.reduce(
-          (a, b) =>
-            b.totalPrecipitationMm <
-            a.totalPrecipitationMm
-              ? b
-              : a
-        )
-      : null;
-
-  const hottestYear =
-    temperatureRows.length
-      ? temperatureRows.reduce(
-          (a, b) =>
-            b.averageTemperatureC >
-            a.averageTemperatureC
-              ? b
-              : a
-        )
-      : null;
-
-  const coolestYear =
-    temperatureRows.length
-      ? temperatureRows.reduce(
-          (a, b) =>
-            b.averageTemperatureC <
-            a.averageTemperatureC
-              ? b
-              : a
-        )
-      : null;
-
-  return {
-    yearsAvailable:
-      rows.map(
-        row => row.year
-      ),
-
-    highestPrecipitationYear:
-      highestPrecipitation,
-
-    lowestPrecipitationYear:
-      lowestPrecipitation,
-
-    precipitationDifferenceMm:
-      highestPrecipitation &&
-      lowestPrecipitation
-        ? round(
-            highestPrecipitation.totalPrecipitationMm -
-              lowestPrecipitation.totalPrecipitationMm
-          )
-        : null,
-
-    precipitationPercentDifference:
-      highestPrecipitation &&
-      lowestPrecipitation
-        ? percentChange(
-            lowestPrecipitation.totalPrecipitationMm,
-            highestPrecipitation.totalPrecipitationMm
-          )
-        : null,
-
-    hottestYear,
-
-    coolestYear,
-
-    precipitationTemperatureCorrelation:
-      correlation(
-        rows.map(
-          row =>
-            row.totalPrecipitationMm
-        ),
-        rows.map(
-          row =>
-            row.averageTemperatureC
-        )
-      ),
-
-    annualRows:
-      rows,
-  };
-}
-
-/* =========================================================
-   FIRMS DATE HELPERS
-========================================================= */
-
-function formatDate(date) {
-  return date
-    .toISOString()
-    .slice(0, 10);
-}
-
-function addDays(
-  date,
-  days
-) {
-  const result =
-    new Date(date);
-
-  result.setUTCDate(
-    result.getUTCDate() +
-      days
+  setCache(
+    key,
+    result
   );
 
   return result;
 }
 
-/* =========================================================
-   FIRMS CSV
-========================================================= */
+function average(values) {
+  const valid =
+    values.filter(
+      value =>
+        Number.isFinite(
+          value
+        )
+    );
 
-function splitCSVLine(line) {
-  const output = [];
-
-  let current = "";
-  let inQuotes = false;
-
-  for (
-    let i = 0;
-    i < line.length;
-    i++
-  ) {
-    const character =
-      line[i];
-
-    if (
-      character === '"'
-    ) {
-      if (
-        inQuotes &&
-        line[i + 1] === '"'
-      ) {
-        current += '"';
-        i++;
-      } else {
-        inQuotes =
-          !inQuotes;
-      }
-    } else if (
-      character === "," &&
-      !inQuotes
-    ) {
-      output.push(
-        current
-      );
-
-      current = "";
-    } else {
-      current +=
-        character;
-    }
+  if (!valid.length) {
+    return null;
   }
 
-  output.push(current);
-
-  return output;
+  return (
+    valid.reduce(
+      (a, b) =>
+        a + b,
+      0
+    ) /
+    valid.length
+  );
 }
 
-function parseCSV(text) {
-  const clean =
-    text.trim();
-
-  if (!clean) {
-    return [];
-  }
-
-  const lines =
-    clean.split(/\r?\n/);
-
-  if (!lines.length) {
-    return [];
-  }
-
-  const headers =
-    splitCSVLine(
-      lines[0]
-    ).map(
-      header =>
-        header
-          .trim()
-          .replace(
-            /^"|"$/g,
-            ""
-          )
+function sum(values) {
+  const valid =
+    values.filter(
+      value =>
+        Number.isFinite(
+          value
+        )
     );
 
-  const rows = [];
+  if (!valid.length) {
+    return null;
+  }
 
-  for (
-    let i = 1;
-    i < lines.length;
-    i++
+  return valid.reduce(
+    (a, b) =>
+      a + b,
+    0
+  );
+}
+
+function round(
+  value,
+  decimals = 2
+) {
+  if (
+    !Number.isFinite(
+      value
+    )
   ) {
-    if (!lines[i].trim()) {
-      continue;
-    }
-
-    const values =
-      splitCSVLine(
-        lines[i]
-      );
-
-    const row = {};
-
-    headers.forEach(
-      (
-        header,
-        index
-      ) => {
-        row[header] =
-          values[index]
-            ?.trim()
-            .replace(
-              /^"|"$/g,
-              "");
-      }
-    );
-
-    rows.push(row);
+    return null;
   }
 
-  return rows;
+  return Number(
+    value.toFixed(
+      decimals
+    )
+  );
 }
 
 /* =========================================================
-   FIRMS SOURCES
+   NASA FIRMS
 ========================================================= */
 
 function getFirmsSources(
@@ -1274,42 +880,86 @@ function getFirmsSources(
   return sources;
 }
 
-/* =========================================================
-   LOCAL FIRMS BOUNDING BOX
-========================================================= */
-
-function createLocalBox(
+function localBoundingBox(
   latitude,
   longitude
 ) {
   const radius = 1;
 
   return {
-    south: Math.max(
-      -90,
-      latitude - radius
-    ),
+    west:
+      longitude - radius,
 
-    north: Math.min(
-      90,
-      latitude + radius
-    ),
+    south:
+      latitude - radius,
 
-    west: Math.max(
-      -180,
-      longitude - radius
-    ),
+    east:
+      longitude + radius,
 
-    east: Math.min(
-      180,
-      longitude + radius
-    ),
+    north:
+      latitude + radius,
   };
 }
 
-/* =========================================================
-   FIRMS REQUEST
-========================================================= */
+function formatDate(
+  date
+) {
+  return date
+    .toISOString()
+    .slice(0, 10);
+}
+
+function addDays(
+  date,
+  days
+) {
+  const result =
+    new Date(date);
+
+  result.setUTCDate(
+    result.getUTCDate() +
+      days
+  );
+
+  return result;
+}
+
+function parseCSV(text) {
+  const lines =
+    text.trim().split(/\r?\n/);
+
+  if (lines.length < 2) {
+    return [];
+  }
+
+  const headers =
+    lines[0].split(",");
+
+  return lines
+    .slice(1)
+    .map(line => {
+      const values =
+        line.split(",");
+
+      const row = {};
+
+      headers.forEach(
+        (
+          header,
+          index
+        ) => {
+          row[
+            header.trim()
+          ] =
+            values[
+              index
+            ]?.trim();
+        }
+      );
+
+      return row;
+    });
+}
 
 async function getFirmsChunk(
   source,
@@ -1318,9 +968,7 @@ async function getFirmsChunk(
   days
 ) {
   if (!FIRMS_MAP_KEY) {
-    throw new Error(
-      "FIRMS_MAP_KEY is missing from Render environment variables."
-    );
+    return [];
   }
 
   const area = [
@@ -1342,1331 +990,878 @@ async function getFirmsChunk(
     await fetch(url);
 
   if (!response.ok) {
-    throw new Error(
-      `NASA FIRMS returned HTTP ${response.status}`
-    );
+    return [];
   }
 
   const text =
     await response.text();
 
-  if (
-    text
-      .toLowerCase()
-      .startsWith("error")
-  ) {
-    throw new Error(
-      `NASA FIRMS error: ${text.slice(
-        0,
-        500
-      )}`
-    );
-  }
-
   return parseCSV(text);
 }
 
-/* =========================================================
-   FIRMS ONE YEAR
-========================================================= */
-
-async function getFirmsYear(
-  box,
-  year
+async function getFirms(
+  latitude,
+  longitude,
+  years
 ) {
-  const key = [
-    box.south,
-    box.north,
-    box.west,
-    box.east,
-    year,
-  ].join(":");
-
-  const cached =
-    getCache(
-      firmsCache,
-      key,
-      FIRMS_CACHE_TTL
-    );
-
-  if (cached) {
-    return cached;
+  if (!FIRMS_MAP_KEY) {
+    return {
+      enabled: false,
+      message:
+        "NASA FIRMS is not configured.",
+    };
   }
 
-  const sources =
-    getFirmsSources(
-      year
+  const result = {};
+
+  const box =
+    localBoundingBox(
+      latitude,
+      longitude
     );
 
-  const allRecords = [];
-
   for (
-    const source of sources
+    const year of years
   ) {
-    let current =
-      new Date(
-        Date.UTC(
-          year,
-          0,
-          1
-        )
+    const records = [];
+
+    const sources =
+      getFirmsSources(
+        year
       );
 
-    const end =
-      new Date(
-        Date.UTC(
-          year + 1,
-          0,
-          1
-        )
-      );
-
-    while (
-      current < end
+    for (
+      const source of sources
     ) {
-      const remaining =
-        Math.ceil(
-          (
-            end -
-            current
-          ) /
-            86400000
+      let date =
+        new Date(
+          Date.UTC(
+            year,
+            0,
+            1
+          )
         );
 
-      const days =
-        Math.min(
-          5,
-          remaining
+      const end =
+        new Date(
+          Date.UTC(
+            year + 1,
+            0,
+            1
+          )
         );
 
-      try {
-        const records =
-          await getFirmsChunk(
-            source,
-            box,
-            formatDate(
-              current
-            ),
-            days
+      while (
+        date < end
+      ) {
+        const remaining =
+          Math.ceil(
+            (
+              end -
+              date
+            ) /
+              86400000
           );
 
-        for (
-          const record of records
-        ) {
-          allRecords.push({
-            ...record,
-            _source:
+        const days =
+          Math.min(
+            5,
+            remaining
+          );
+
+        try {
+          const rows =
+            await getFirmsChunk(
               source,
-          });
-        }
-      } catch (error) {
-        console.error(
-          `FIRMS ${source} ${formatDate(
-            current
-          )}:`,
-          error.message
-        );
+              box,
+              formatDate(
+                date
+              ),
+              days
+            );
+
+          records.push(
+            ...rows.map(
+              row => ({
+                ...row,
+                source,
+              })
+            )
+          );
+        } catch {}
+
+        date =
+          addDays(
+            date,
+            days
+          );
       }
-
-      current =
-        addDays(
-          current,
-          days
-        );
     }
-  }
 
-  const summary =
-    summarizeFirms(
-      allRecords,
-      year
-    );
+    const monthly = {};
 
-  setCache(
-    firmsCache,
-    key,
-    summary
-  );
+    for (
+      let month = 1;
+      month <= 12;
+      month++
+    ) {
+      monthly[
+        month
+      ] = 0;
+    }
 
-  return summary;
-}
+    let day = 0;
+    let night = 0;
 
-/* =========================================================
-   FIRMS MULTI-YEAR
-========================================================= */
+    for (
+      const record of records
+    ) {
+      if (
+        record.acq_date
+      ) {
+        const month =
+          Number(
+            record.acq_date.slice(
+              5,
+              7
+            )
+          );
 
-async function getFirmsMultiYear(
-  box,
-  startYear,
-  endYear
-) {
-  const years = {};
-
-  for (
-    let year = startYear;
-    year <= endYear;
-    year++
-  ) {
-    years[year] =
-      await getFirmsYear(
-        box,
-        year
-      );
-  }
-
-  return {
-    source:
-      "NASA FIRMS",
-
-    scope: {
-      south: box.south,
-      north: box.north,
-      west: box.west,
-      east: box.east,
-    },
-
-    years,
-  };
-}
-
-/* =========================================================
-   FIRMS SUMMARY
-========================================================= */
-
-function summarizeFirms(
-  records,
-  year
-) {
-  const monthly = {};
-
-  for (
-    let month = 1;
-    month <= 12;
-    month++
-  ) {
-    monthly[month] = 0;
-  }
-
-  const sensors = {};
-
-  let day = 0;
-  let night = 0;
-  let unknown = 0;
-
-  const frpValues = [];
-
-  for (
-    const record of records
-  ) {
-    const date =
-      record.acq_date;
-
-    if (date) {
-      const month =
-        Number(
-          date.slice(5, 7)
-        );
+        if (
+          monthly[month] !==
+          undefined
+        ) {
+          monthly[
+            month
+          ]++;
+        }
+      }
 
       if (
-        month >= 1 &&
-        month <= 12
+        record.daynight ===
+        "D"
       ) {
-        monthly[month]++;
+        day++;
+      }
+
+      if (
+        record.daynight ===
+        "N"
+      ) {
+        night++;
       }
     }
 
-    const source =
-      record._source ||
-      "unknown";
+    result[year] = {
+      totalDetections:
+        records.length,
 
-    sensors[source] =
-      (sensors[source] || 0) +
-      1;
+      daytimeDetections:
+        day,
 
-    const timing =
-      String(
-        record.daynight ||
-          ""
-      ).toUpperCase();
+      nighttimeDetections:
+        night,
 
-    if (timing === "D") {
-      day++;
-    } else if (
-      timing === "N"
-    ) {
-      night++;
-    } else {
-      unknown++;
-    }
-
-    const frp =
-      Number(record.frp);
-
-    if (
-      Number.isFinite(frp)
-    ) {
-      frpValues.push(frp);
-    }
-  }
-
-  const total =
-    records.length;
-
-  const activeMonths =
-    Object.entries(
-      monthly
-    )
-      .map(
-        ([
-          month,
-          count,
-        ]) => ({
-          month: Number(month),
-          count,
-        })
-      )
-      .sort(
-        (a, b) =>
-          b.count -
-          a.count
-      );
-
-  return {
-    year,
-
-    totalDetections:
-      total,
-
-    daytimeDetections:
-      day,
-
-    nighttimeDetections:
-      night,
-
-    unknownTimingDetections:
-      unknown,
-
-    nighttimePercentage:
-      total > 0
-        ? round(
-            (night /
-              total) *
-              100
-          )
-        : null,
-
-    maximumFRPMW:
-      frpValues.length
-        ? round(
-            Math.max(
-              ...frpValues
+      nighttimePercentage:
+        records.length
+          ? round(
+              (night /
+                records.length) *
+                100
             )
-          )
-        : null,
+          : 0,
 
-    averageFRPMW:
-      frpValues.length
-        ? round(
-            average(
-              frpValues
-            )
-          )
-        : null,
+      monthlyDetections:
+        monthly,
 
-    monthlyDetections:
-      monthly,
-
-    mostActiveMonths:
-      activeMonths.slice(
-        0,
-        3
-      ),
-
-    sensorDetections:
-      sensors,
-
-    importantWarning:
-      "NASA FIRMS detections are satellite-detected thermal anomalies or active-fire observations. They are not automatically confirmed wildfires.",
-  };
-}
-
-/* =========================================================
-   FIRMS ANALYSIS
-========================================================= */
-
-function analyzeFirms(
-  firms
-) {
-  const rows =
-    Object.values(
-      firms?.years || {}
-    ).sort(
-      (a, b) =>
-        a.year - b.year
-    );
-
-  if (!rows.length) {
-    return null;
-  }
-
-  const highest =
-    rows.reduce(
-      (a, b) =>
-        b.totalDetections >
-        a.totalDetections
-          ? b
-          : a
-    );
-
-  const lowest =
-    rows.reduce(
-      (a, b) =>
-        b.totalDetections <
-        a.totalDetections
-          ? b
-          : a
-    );
-
-  const total =
-    rows.reduce(
-      (sumValue, row) =>
-        sumValue +
-        row.totalDetections,
-      0
-    );
-
-  const night =
-    rows.reduce(
-      (sumValue, row) =>
-        sumValue +
-        row.nighttimeDetections,
-      0
-    );
-
-  const monthlyTotals = {};
-
-  for (
-    let month = 1;
-    month <= 12;
-    month++
-  ) {
-    monthlyTotals[month] = 0;
-  }
-
-  for (
-    const row of rows
-  ) {
-    for (
-      const [
-        month,
-        count,
-      ] of Object.entries(
-        row.monthlyDetections
-      )
-    ) {
-      monthlyTotals[
-        month
-      ] += count;
-    }
-  }
-
-  const months =
-    Object.entries(
-      monthlyTotals
-    )
-      .map(
-        ([
-          month,
-          count,
-        ]) => ({
-          month: Number(month),
-          count,
-        })
-      )
-      .sort(
-        (a, b) =>
-          b.count -
-          a.count
-      );
-
-  const sensors = {};
-
-  for (
-    const row of rows
-  ) {
-    for (
-      const [
-        sensor,
-        count,
-      ] of Object.entries(
-        row.sensorDetections
-      )
-    ) {
-      sensors[sensor] =
-        (sensors[sensor] || 0) +
-        count;
-    }
+      warning:
+        "FIRMS detections are satellite-detected thermal anomalies/active-fire observations, not automatically confirmed wildfires.",
+    };
   }
 
   return {
-    annualRows:
-      rows,
+    enabled: true,
 
-    highestDetectionYear:
-      highest,
+    searchArea: box,
 
-    lowestDetectionYear:
-      lowest,
-
-    totalDetections:
-      total,
-
-    nighttimePercentage:
-      total > 0
-        ? round(
-            (night /
-              total) *
-              100
-          )
-        : null,
-
-    mostActiveMonths:
-      months.slice(
-        0,
-        5
-      ),
-
-    sensorTotals:
-      sensors,
-
-    firstYear:
-      rows[0].year,
-
-    lastYear:
-      rows[
-        rows.length - 1
-      ].year,
+    annual: result,
   };
 }
 
 /* =========================================================
-   COMBINE FIRE + WEATHER
+   NASA EARTHDATA DATASET DISCOVERY
 ========================================================= */
 
-function combineData(
-  power,
-  firms
+async function searchNASADataCatalog(
+  question
 ) {
-  const rows = [];
+  try {
+    const url =
+      "https://cmr.earthdata.nasa.gov/search/collections" +
+      `?keyword=${encodeURIComponent(
+        question
+      )}` +
+      "&page_size=8" +
+      "&format=json";
 
-  const fireYears =
-    Object.keys(
-      firms?.years || {}
-    );
+    const response =
+      await fetch(url);
 
-  for (
-    const year of fireYears
-  ) {
-    const weather =
-      power?.annual?.[
-        year
-      ];
-
-    const fire =
-      firms.years[
-        year
-      ];
-
-    if (!weather) {
-      continue;
+    if (!response.ok) {
+      return [];
     }
 
-    rows.push({
-      year: Number(year),
+    const data =
+      await response.json();
 
-      averageTemperatureC:
-        weather.averageTemperatureC,
+    const entries =
+      data?.feed?.entry ||
+      [];
 
-      precipitationMm:
-        weather.totalPrecipitationMm,
+    return entries
+      .slice(0, 8)
+      .map(entry => ({
+        title:
+          entry.title,
 
-      humidityPercent:
-        weather.averageRelativeHumidityPercent,
+        id:
+          entry.id,
 
-      windSpeedMs:
-        weather.averageWindSpeedMs,
+        summary:
+          entry.summary,
 
-      fireDetections:
-        fire.totalDetections,
+        shortName:
+          entry.short_name,
 
-      maximumFRPMW:
-        fire.maximumFRPMW,
-    });
+        version:
+          entry.version_id,
+
+        temporal:
+          entry.time_start
+            ? {
+                start:
+                  entry.time_start,
+
+                end:
+                  entry.time_end ||
+                  null,
+              }
+            : null,
+
+        organizations:
+          entry.archive_center ||
+          [],
+
+        links:
+          entry.links
+            ?.slice(0, 5)
+            .map(
+              link => ({
+                href:
+                  link.href,
+
+                title:
+                  link.title ||
+                  "",
+              })
+            ) ||
+          [],
+      }));
+  } catch {
+    return [];
   }
-
-  return {
-    rows,
-
-    precipitationFireCorrelation:
-      correlation(
-        rows.map(
-          row =>
-            row.precipitationMm
-        ),
-        rows.map(
-          row =>
-            row.fireDetections
-        )
-      ),
-
-    temperatureFireCorrelation:
-      correlation(
-        rows.map(
-          row =>
-            row.averageTemperatureC
-        ),
-        rows.map(
-          row =>
-            row.fireDetections
-        )
-      ),
-
-    humidityFireCorrelation:
-      correlation(
-        rows.map(
-          row =>
-            row.humidityPercent
-        ),
-        rows.map(
-          row =>
-            row.fireDetections
-        )
-      ),
-  };
 }
 
 /* =========================================================
-   CONVERSATION CONTEXT
+   GENERAL NASA CONTEXT
 ========================================================= */
 
-function buildConversationContext(
-  conversation
-) {
-  if (
-    !Array.isArray(
-      conversation
-    ) ||
-    !conversation.length
-  ) {
-    return "No previous conversation.";
-  }
-
-  return conversation
-    .slice(-12)
-    .map(message => {
-      const role =
-        message.role ===
-        "assistant"
-          ? "Assistant"
-          : "User";
-
-      return (
-        role +
-        ": " +
-        String(
-          message.content || ""
-        )
-      );
-    })
-    .join("\n");
-}
-
-/* =========================================================
-   DATA COLLECTION
-========================================================= */
-
-async function collectNASAData({
+async function buildNASAContext({
   question,
-  location,
+  pageLocation,
   explorer,
+  conversation,
 }) {
-  const explorerYear =
-    Number(
-      explorer?.year
-    ) ||
-    new Date().getFullYear();
-
   const years =
-    determineYears(
+    extractYears(
+      question
+    );
+
+  const locations =
+    await findQuestionLocations(
       question,
-      explorerYear
+      pageLocation
     );
 
-  /*
-    Prevent accidental enormous requests.
-  */
+  const context = {
+    userRequest: question,
 
-  const safeYears =
-    years
-      .filter(
-        year =>
-          year >= 1981 &&
-          year <=
-            new Date().getFullYear()
-      )
-      .slice(
-        0,
-        12
-      );
+    requestedYears:
+      years,
 
-  const startYear =
-    Math.min(
-      ...safeYears
-    );
+    requestedLocations:
+      locations,
 
-  const endYear =
-    Math.max(
-      ...safeYears
-    );
+    pageContext: {
+      location:
+        pageLocation || null,
 
-  const result = {
-    request: {
-      question,
-      years:
-        safeYears,
-      startYear,
-      endYear,
+      explorer:
+        explorer || null,
     },
 
-    locations: {},
+    previousConversation:
+      conversation || [],
 
-    countries: {},
+    questionClassification: {
+      earth:
+        isEarthQuestion(
+          question
+        ),
 
-    fire: {},
+      fire:
+        isFireQuestion(
+          question
+        ),
 
-    analysis: {},
+      weather:
+        isWeatherQuestion(
+          question
+        ),
 
-    notes: [],
+      dataset:
+        isDatasetQuestion(
+          question
+        ),
+
+      satellite:
+        isSatelliteQuestion(
+          question
+        ),
+
+      space:
+        isSpaceQuestion(
+          question
+        ),
+    },
   };
 
-  /* =======================================================
-     FIND LOCATIONS IN QUESTION
-  ======================================================= */
+  /* -----------------------------------------
+     NASA POWER
 
-  let locations =
-    findKnownLocations(
-      question
-    );
-
-  /*
-    If the question doesn't contain a known
-    location, use the Explorer's location.
-  */
+     Only use it when the user actually asks
+     for Earth environmental measurements.
+  ----------------------------------------- */
 
   if (
-    !locations.length &&
-    location &&
-    isNumber(
-      Number(
-        location.latitude
-      )
-    ) &&
-    isNumber(
-      Number(
-        location.longitude
-      )
+    locations.length &&
+    isWeatherQuestion(
+      question
     )
   ) {
-    locations = [
-      {
-        name:
-          location.name ||
-          "Selected location",
+    const startYear =
+      years.length
+        ? Math.min(...years)
+        : new Date().getFullYear();
 
-        country:
-          location.country ||
-          "",
+    const endYear =
+      years.length
+        ? Math.max(...years)
+        : startYear;
 
-        region:
-          location.region ||
-          "",
+    context.power = {};
 
-        latitude:
-          Number(
-            location.latitude
-          ),
-
-        longitude:
-          Number(
-            location.longitude
-          ),
-      },
-    ];
-  }
-
-  /* =======================================================
-     GEOCODE SIMPLE UNKNOWN PLACE
-  ======================================================= */
-
-  if (
-    !locations.length
-  ) {
-    const locationMatch =
-      question.match(
-        /\b(?:in|at|around|near|for)\s+([A-Z][A-Za-zÀ-ÿ]+(?:\s+[A-Z][A-Za-zÀ-ÿ]+){0,3})/
-      );
-
-    if (locationMatch) {
-      const possible =
-        await geocodeLocation(
-          locationMatch[1]
+    for (
+      const location of locations
+    ) {
+      try {
+        context.power[
+          location.name
+        ] = await getPower(
+          location.latitude,
+          location.longitude,
+          startYear,
+          endYear
         );
-
-      if (possible) {
-        locations = [
-          possible,
-        ];
+      } catch (
+        error
+      ) {
+        context.power[
+          location.name
+        ] = {
+          error:
+            error.message,
+        };
       }
     }
   }
 
-  /* =======================================================
-     POWER FOR EACH LOCATION
-  ======================================================= */
-
-  for (
-    const place of locations
-  ) {
-    const power =
-      await getNASAPowerData(
-        place.latitude,
-        place.longitude,
-        startYear,
-        endYear
-      );
-
-    const analysis =
-      analyzePower(
-        power
-      );
-
-    result.locations[
-      place.name
-    ] = {
-      metadata:
-        place,
-
-      power,
-
-      analysis,
-    };
-  }
-
-  /* =======================================================
-     COUNTRY DETECTION
-  ======================================================= */
-
-  const countries =
-    findKnownCountries(
-      question
-    );
-
-  for (
-    const country of countries
-  ) {
-    /*
-      NASA POWER point data is used here at the
-      representative country coordinate.
-
-      We explicitly label this as a representative
-      point estimate rather than pretending it is
-      an exact country-wide average.
-    */
-
-    const power =
-      await getNASAPowerData(
-        country.latitude,
-        country.longitude,
-        startYear,
-        endYear
-      );
-
-    result.countries[
-      country.name
-    ] = {
-      metadata: {
-        ...country,
-
-        method:
-          "Representative coordinate estimate, not a country-wide spatial average.",
-      },
-
-      power,
-
-      analysis:
-        analyzePower(
-          power
-        ),
-    };
-  }
-
-  /* =======================================================
-     FIRE DATA
-  ======================================================= */
+  /* -----------------------------------------
+     NASA FIRMS
+  ----------------------------------------- */
 
   if (
+    locations.length &&
     isFireQuestion(
       question
     )
   ) {
+    const fireYears =
+      years.length
+        ? years
+        : [
+            new Date().getFullYear(),
+          ];
+
+    context.firms = {};
+
     for (
-      const place of locations
+      const location of locations
     ) {
-      const box =
-        createLocalBox(
-          place.latitude,
-          place.longitude
-        );
-
-      const firms =
-        await getFirmsMultiYear(
-          box,
-          startYear,
-          endYear
-        );
-
-      result.fire[
-        place.name
-      ] = {
-        metadata: {
-          location:
-            place,
-
-          searchArea:
-            box,
-
-          method:
-            "Local bounding box approximately 2° × 2° around the selected location.",
-        },
-
-        firms,
-
-        analysis:
-          analyzeFirms(
-            firms
-          ),
-      };
-
-      result.analysis[
-        place.name
-      ] = {
-        weatherFire:
-          combineData(
-            result.locations[
-              place.name
-            ]?.power,
-
-            firms
-          ),
-      };
+      context.firms[
+        location.name
+      ] = await getFirms(
+        location.latitude,
+        location.longitude,
+        fireYears
+      );
     }
   }
 
-  /*
-    If the user asks about two countries and fires,
-    retrieve FIRMS around their representative
-    coordinates.
-  */
+  /* -----------------------------------------
+     EARTHDATA DATASET DISCOVERY
+
+     Useful for questions about NASA datasets,
+     instruments, sensors, products, etc.
+  ----------------------------------------- */
 
   if (
-    isFireQuestion(
+    isDatasetQuestion(
       question
-    ) &&
-    countries.length
+    ) ||
+    isSatelliteQuestion(
+      question
+    ) ||
+    isEarthQuestion(
+      question
+    )
   ) {
-    for (
-      const country of countries
-    ) {
-      const box =
-        createLocalBox(
-          country.latitude,
-          country.longitude
-        );
-
-      const firms =
-        await getFirmsMultiYear(
-          box,
-          startYear,
-          endYear
-        );
-
-      result.fire[
-        country.name
-      ] = {
-        metadata: {
-          location:
-            country,
-
-          searchArea:
-            box,
-
-          method:
-            "Representative local area around the country coordinate; not a complete country-wide fire inventory.",
-        },
-
-        firms,
-
-        analysis:
-          analyzeFirms(
-            firms
-          ),
-      };
-    }
-  }
-
-  /* =======================================================
-     COMPARISON STATISTICS
-  ======================================================= */
-
-  const locationNames =
-    Object.keys(
-      result.locations
-    );
-
-  if (
-    locationNames.length >= 2
-  ) {
-    result.analysis.locationComparison =
-      locationNames.map(
-        name => ({
-          location:
-            name,
-
-          annual:
-            result.locations[
-              name
-            ].power.annual,
-
-          analysis:
-            result.locations[
-              name
-            ].analysis,
-        })
+    context.earthdata =
+      await searchNASADataCatalog(
+        question
       );
   }
 
-  const countryNames =
-    Object.keys(
-      result.countries
-    );
-
-  if (
-    countryNames.length >= 2
-  ) {
-    result.analysis.countryComparison =
-      countryNames.map(
-        name => ({
-          country:
-            name,
-
-          annual:
-            result.countries[
-              name
-            ].power.annual,
-
-          analysis:
-            result.countries[
-              name
-            ].analysis,
-        })
-      );
-  }
-
-  return result;
+  return context;
 }
 
 /* =========================================================
-   GEMINI PROMPT
+   AI PROMPT
 ========================================================= */
 
 function buildPrompt({
   question,
-  nasaData,
+  context,
   conversation,
-  explorer,
 }) {
   return `
-You are TIME EARTH's NASA Earth Intelligence AI.
+You are the general NASA AI research assistant
+inside TIME EARTH.
 
-Your purpose is to help users understand real
-NASA Earth observation and environmental data.
+You are NOT merely a chatbot for the current map.
 
-==================================================
-MOST IMPORTANT RULE
-==================================================
+You are a broad NASA information assistant.
 
-The backend has already retrieved NASA data
-specifically for this question.
+The user can ask about:
 
-USE THAT DATA.
-
-Do NOT claim that a year, location, measurement,
-or sensor is unavailable if it exists anywhere
-inside the supplied NASA DATA section.
-
-Never invent NASA measurements.
-
-==================================================
-NASA POWER
-==================================================
-
-NASA POWER can provide:
-
-- average temperature
-- average maximum temperature
-- average minimum temperature
-- diurnal temperature range
-- precipitation
-- relative humidity
-- wind speed
-- solar radiation
-
-For year comparisons:
-
-Actually compare the requested years.
-
-Calculate or use:
-
-absolute difference
-
-percentage change
-
-direction of change
-
-highest year
-
-lowest year
-
-If multiple years are available, inspect the
-whole series before answering a highest/lowest
-question.
-
-For "unusually wet" or "unusually dry", compare
-the requested year against the surrounding or
-reference years supplied.
+• any place on Earth
+• any year or date
+• multiple years
+• multiple locations
+• weather
+• climate
+• fires
+• oceans
+• atmosphere
+• vegetation
+• agriculture
+• land
+• water
+• satellites
+• sensors
+• instruments
+• NASA missions
+• NASA datasets
+• Earth observation
+• satellite imagery
+• astronomy
+• planets
+• the Moon
+• the Sun
+• galaxies
+• stars
+• spacecraft
+• NASA discoveries
+• NASA science
+• scientific concepts
+• historical NASA observations
+• current NASA information
 
 ==================================================
-NASA FIRMS
+THE USER'S QUESTION IS THE AUTHORITY
 ==================================================
 
-FIRMS provides satellite observations of active
-fires / thermal anomalies.
+The user's question determines what information
+you should answer.
 
-IMPORTANT:
+DO NOT automatically restrict the answer to:
 
-A FIRMS detection is NOT automatically a
-confirmed wildfire.
+• the current map location
+• the current country
+• the current year
+• the current dataset
+• the currently selected satellite
+• the current observation date
 
-Never write:
+Page context is only additional context.
 
-"There were exactly 1,500 wildfires."
+If the user explicitly mentions a different place,
+time, satellite, planet, dataset, or property,
+USE THAT instead.
 
-Instead write:
+Example:
 
-"FIRMS recorded 1,500 satellite-detected
-thermal anomalies/active-fire detections."
+Page:
+Delhi, 2026
 
-FIRMS analysis can include:
+User:
+"What was rainfall in Bahir Dar from 2015 to 2020?"
 
-- annual detections
-- monthly detections
-- day/night detections
-- nighttime percentage
-- sensor detections
-- MODIS
-- VIIRS
-- maximum FRP
-- average FRP
+Answer:
+Bahir Dar, 2015–2020.
 
-==================================================
-MODIS VS VIIRS
-==================================================
+NOT Delhi 2026.
 
-When comparing MODIS and VIIRS:
+Example:
 
-Use the actual supplied counts.
+Page:
+Bahir Dar
 
-Explain that differences can result from:
+User:
+"How does the James Webb Space Telescope work?"
 
-- spatial resolution
-- sensor characteristics
-- orbital overpass timing
-- detection algorithms
-- detection thresholds
-- cloud conditions
-- fire size
-- fire duration
+Answer:
+James Webb.
 
-Do not automatically interpret a higher count
-as more real fires.
+NOT Bahir Dar.
 
-==================================================
-LOCATION RULES
-==================================================
+Example:
 
-If the user explicitly asks about:
+Page:
+Earth map
 
-"Bahir Dar and Nairobi"
+User:
+"What is the temperature on Mars?"
 
-compare Bahir Dar and Nairobi.
-
-Do not silently answer about the Explorer's
-current location instead.
-
-If the user asks about:
-
-"Ethiopia and Kenya"
-
-use the supplied Ethiopia and Kenya data.
-
-IMPORTANT:
-
-Country values may be based on representative
-coordinates.
-
-If so, explicitly say that they are representative
-point estimates and NOT exact country-wide averages.
+Answer:
+Mars.
 
 ==================================================
-TIME RULES
-==================================================
-
-If the user asks:
-
-2015 and 2019
-
-compare 2015 and 2019.
-
-If the user asks:
-
-2015–2024
-
-analyze the entire period.
-
-If the user asks:
-
-past 10 years
-
-use the ten years supplied by the backend.
-
-If the user asks:
-
-surrounding five years
-
-compare the requested year with the appropriate
-nearby years present in the supplied data.
-
-For follow-up questions such as:
-
-"What about 2022?"
-
-preserve the previous location/context and
-switch to 2022.
-
-==================================================
-CORRELATION VS CAUSATION
+DO NOT USE THE PAGE AS A LIMIT
 ==================================================
 
 Never say:
 
-"Lower rainfall caused more fires"
+"The provided NASA context doesn't contain this."
 
-merely because the data has a negative
-correlation.
+Never say:
 
-Instead say:
+"I can only answer for the selected location."
 
-"The data shows an association/correlation,
-but this alone does not establish causation."
+Never say:
 
-Mention other possible influences when useful:
+"I only have data for the current year."
 
-- land management
-- agriculture
-- vegetation
-- human activity
-- drought
-- temperature
-- wind
-- fuel availability
-- detection conditions
+Never say:
+
+"I cannot answer because the current dataset
+doesn't include it."
+
+Instead:
+
+1. Understand what the user wants.
+2. Use the NASA data supplied when relevant.
+3. Use NASA sources through web search when more
+   information is needed.
+4. Use general scientific knowledge when appropriate.
+5. Combine the information into a useful answer.
 
 ==================================================
-NASA OBSERVATION VS INTERPRETATION
+NASA SOURCES
 ==================================================
 
-Clearly separate:
+Prefer authoritative NASA sources.
 
-NASA OBSERVATION
+Useful NASA ecosystems include:
 
-from
+NASA Science
+NASA Earthdata
+NASA POWER
+NASA FIRMS
+NASA GIBS
+NASA mission pages
+NASA instrument documentation
+NASA datasets
+NASA APIs
+NASA publications and technical documentation
 
-SCIENTIFIC INTERPRETATION
+Google Search is available.
 
-from
+When the question needs current or specific NASA
+information, SEARCH for it.
 
-LIMITATIONS.
+Do not pretend that the supplied context is the
+entire NASA knowledge base.
+
+==================================================
+NASA MEASUREMENTS
+==================================================
+
+When exact NASA measurements are supplied:
+
+USE THEM.
+
+When the user asks for information that is not
+represented by the structured context:
+
+RESEARCH the relevant NASA source.
+
+Do not invent a number.
+
+If an exact numerical value cannot be verified,
+give the relevant NASA information and explain
+what the measurement represents instead of making
+up a value.
+
+==================================================
+LOCATION
+==================================================
+
+The user can ask about ANY location.
+
+Do not restrict locations to Ethiopia,
+Kenya, India, or any predefined list.
+
+For example:
+
+Tokyo
+New York
+Amazon rainforest
+Sahara
+Antarctica
+Pacific Ocean
+Mount Everest
+California
+Ethiopia
+Bahir Dar
+Mars
+
+Treat the explicit location in the question as
+the target.
+
+==================================================
+TIME
+==================================================
+
+The user can ask about ANY time period.
+
+Examples:
+
+1990
+2005
+2015–2020
+last decade
+before 2000
+during 2022
+historically
+today
+recently
+
+Do not substitute the Explorer's current year
+for the year the user actually asks about.
+
+==================================================
+PROPERTY
+==================================================
+
+The user can ask about ANY relevant property.
+
+Examples:
+
+temperature
+precipitation
+humidity
+wind
+soil moisture
+vegetation
+fires
+burned area
+radiation
+clouds
+aerosols
+ocean temperature
+sea level
+ice
+snow
+carbon
+land cover
+spectral bands
+surface reflectance
+elevation
+gravity
+magnetic fields
+
+Do not assume the property is limited to the
+current dataset.
+
+==================================================
+ANSWER STYLE
+==================================================
+
+The answer should be:
+
+SHORT but EXPLAINED.
+
+Do not dump raw data.
+
+Do not give a giant essay.
+
+For most questions use:
+
+1. Direct answer
+2. 2–5 useful bullets or short paragraphs
+3. Important interpretation
+4. Small limitation only when genuinely necessary
+
+Target approximately:
+
+100–250 words.
+
+For very simple questions:
+
+50–120 words.
+
+For complex comparisons:
+
+Use a compact table followed by a short explanation.
+
+==================================================
+EXPLAIN, DON'T JUST REPORT
+==================================================
+
+Do not merely say:
+
+"Temperature was 23°C."
+
+Explain what that means.
 
 Example:
 
-NASA observation:
-NASA POWER recorded 621 mm of precipitation.
-
-Interpretation:
-Lower precipitation can contribute to drier
-vegetation.
-
-Limitation:
-That alone does not prove that rainfall caused
-fire activity.
+"NASA POWER reports an average temperature of
+23°C. In practical terms, that means the average
+daily temperature over the selected period was
+around 23°C; it does not mean the temperature
+stayed at 23°C all day."
 
 ==================================================
-ANSWER QUALITY
+FIRE QUESTIONS
 ==================================================
 
-For simple questions:
+FIRMS observations are satellite-detected
+thermal anomalies / active-fire detections.
 
-Answer directly.
+Do not automatically call every detection a
+confirmed wildfire.
 
-For comparisons:
+Say:
 
-Use a compact table when useful.
+"FIRMS detected..."
 
-For multi-year questions:
+rather than:
 
-1. Direct answer
-2. NASA observations
-3. Calculated comparison
-4. Scientific interpretation
-5. Limitations
+"There were exactly X wildfires."
 
-For fire questions:
-
-Always distinguish satellite detections from
-confirmed wildfires.
-
-Do not overwhelm the user with raw JSON.
-
-Use units.
-
-Round numbers sensibly.
+Explain the distinction briefly when relevant.
 
 ==================================================
-CURRENT EXPLORER CONTEXT
+CORRELATION
+==================================================
+
+Do not turn correlation into causation.
+
+Bad:
+
+"Low rainfall caused the fires."
+
+Better:
+
+"Fire detections were higher in the drier years,
+which is consistent with conditions that can
+increase fire risk, but this comparison alone
+does not prove rainfall caused the fires."
+
+==================================================
+COMPARISONS
+==================================================
+
+When comparing:
+
+• locations
+• years
+• satellites
+• sensors
+• datasets
+• planets
+• missions
+
+actually compare them.
+
+Do not answer only one side.
+
+==================================================
+FOLLOW-UP QUESTIONS
+==================================================
+
+Use previous conversation when the user says:
+
+"What about 2022?"
+"What about Nairobi?"
+"Which one was higher?"
+"Why?"
+"Compare that with 2019."
+
+Preserve the relevant topic from the conversation.
+
+==================================================
+CURRENT PAGE CONTEXT
+==================================================
+
+This is OPTIONAL context.
+
+Do not treat it as a restriction.
+
+${JSON.stringify(
+  context.pageContext,
+  null,
+  2
+)}
+
+==================================================
+RETRIEVED NASA INFORMATION
 ==================================================
 
 ${JSON.stringify(
-  explorer || {},
+  context,
   null,
   2
 )}
@@ -2678,31 +1873,23 @@ PREVIOUS CONVERSATION
 ${conversation}
 
 ==================================================
-NASA DATA RETRIEVED BY THE BACKEND
-==================================================
-
-${JSON.stringify(
-  nasaData,
-  null,
-  2
-)}
-
-==================================================
 USER QUESTION
 ==================================================
 
 ${question}
+
+Now answer the user's actual question directly.
 `;
 }
 
 /* =========================================================
-   NASA AI ENDPOINT
+   MAIN AI ROUTE
 ========================================================= */
 
 app.post(
   "/api/nasa/ask",
   async (req, res) => {
-    const startTime =
+    const start =
       Date.now();
 
     try {
@@ -2724,58 +1911,62 @@ app.post(
       }
 
       console.log(
-        "----------------------------------------"
-      );
-
-      console.log(
-        "TIME EARTH NASA AI"
-      );
-
-      console.log(
-        "Question:",
+        "NASA AI QUESTION:",
         question
       );
 
-      console.log(
-        "----------------------------------------"
-      );
+      /*
+        Build information dynamically from the
+        user's question.
 
-      /* -----------------------------------------
-         GET NASA DATA
-      ----------------------------------------- */
+        The current page is NOT the source of truth.
+      */
 
-      const nasaData =
-        await collectNASAData({
+      const context =
+        await buildNASAContext({
           question:
             question.trim(),
 
-          location,
+          pageLocation:
+            location,
 
           explorer,
+
+          conversation,
         });
 
-      /* -----------------------------------------
-         BUILD PROMPT
-      ----------------------------------------- */
+      const previousConversation =
+        conversation
+          .slice(-12)
+          .map(
+            message =>
+              `${
+                message.role ===
+                "assistant"
+                  ? "Assistant"
+                  : "User"
+              }: ${
+                message.content || ""
+              }`
+          )
+          .join("\n");
 
       const prompt =
         buildPrompt({
           question:
             question.trim(),
 
-          nasaData,
+          context,
 
           conversation:
-            buildConversationContext(
-              conversation
-            ),
-
-          explorer,
+            previousConversation ||
+            "No previous conversation.",
         });
 
-      /* -----------------------------------------
-         GEMINI
-      ----------------------------------------- */
+      /*
+        Gemini can research NASA information
+        beyond the structured APIs above.
+      */
 
       const response =
         await ai.models.generateContent(
@@ -2793,6 +1984,8 @@ app.post(
                 },
               ],
 
+              temperature: 0.2,
+
               maxOutputTokens:
                 3000,
             },
@@ -2801,45 +1994,26 @@ app.post(
 
       const answer =
         response.text ||
-        "I could not generate an answer.";
-
-      const processingTime =
-        Date.now() -
-        startTime;
-
-      console.log(
-        `Completed in ${processingTime} ms`
-      );
+        "I couldn't generate an answer.";
 
       res.json({
         answer,
 
         meta: {
+          processingTimeMs:
+            Date.now() -
+            start,
+
           model:
             GEMINI_MODEL,
 
-          processingTimeMs:
-            processingTime,
+          questionDriven: true,
 
-          questionType: {
-            fire:
-              isFireQuestion(
-                question
-              ),
-
-            climate:
-              isClimateQuestion(
-                question
-              ),
-
-            comparison:
-              isComparisonQuestion(
-                question
-              ),
-          },
+          pageContextIsOptional:
+            true,
         },
 
-        nasa: nasaData,
+        context,
       });
     } catch (error) {
       console.error(
@@ -2849,7 +2023,7 @@ app.post(
 
       res.status(500).json({
         error:
-          "NASA AI could not answer the question.",
+          "NASA AI encountered an error.",
 
         details:
           error.message,
@@ -2879,24 +2053,13 @@ app.get(
       firms:
         FIRMS_MAP_KEY
           ? "READY"
-          : "MISSING",
+          : "OPTIONAL / MISSING",
 
       model:
         GEMINI_MODEL,
 
-      capabilities: [
-        "NASA POWER multi-year analysis",
-        "NASA POWER location comparison",
-        "NASA POWER climate analysis",
-        "NASA FIRMS historical fire analysis",
-        "annual fire analysis",
-        "monthly fire analysis",
-        "day/night analysis",
-        "MODIS vs VIIRS",
-        "FRP analysis",
-        "fire-weather correlation",
-        "conversation-aware questions",
-      ],
+      mode:
+        "QUESTION_DRIVEN_GENERAL_NASA_AI",
     });
   }
 );
@@ -2909,38 +2072,36 @@ app.get(
   "/api/nasa/status",
   (req, res) => {
     res.json({
-      nasaPOWER:
-        "READY",
+      status:
+        "TIME EARTH NASA AI READY",
 
-      nasaFIRMS:
-        FIRMS_MAP_KEY
-          ? "READY"
-          : "MISSING MAP KEY",
+      mode:
+        "General NASA research assistant",
+
+      pageContext:
+        "Optional",
+
+      questionDriven:
+        true,
 
       gemini:
         GEMINI_API_KEY
           ? "READY"
-          : "MISSING API KEY",
+          : "MISSING",
+
+      firms:
+        FIRMS_MAP_KEY
+          ? "READY"
+          : "NOT CONFIGURED",
 
       model:
         GEMINI_MODEL,
-
-      cache: {
-        power:
-          powerCache.size,
-
-        firms:
-          firmsCache.size,
-
-        geocoding:
-          geocodeCache.size,
-      },
     });
   }
 );
 
 /* =========================================================
-   START SERVER
+   SERVER
 ========================================================= */
 
 app.listen(
@@ -2948,11 +2109,15 @@ app.listen(
   "0.0.0.0",
   () => {
     console.log(
-      "========================================"
+      "======================================"
     );
 
     console.log(
-      "TIME EARTH NASA AI SERVER"
+      "TIME EARTH NASA AI"
+    );
+
+    console.log(
+      "General NASA Research Mode"
     );
 
     console.log(
@@ -2968,10 +2133,10 @@ app.listen(
     );
 
     console.log(
-      `NASA FIRMS: ${
+      `FIRMS: ${
         FIRMS_MAP_KEY
           ? "READY"
-          : "MISSING"
+          : "OPTIONAL"
       }`
     );
 
@@ -2980,7 +2145,15 @@ app.listen(
     );
 
     console.log(
-      "========================================"
+      "Question-driven: YES"
+    );
+
+    console.log(
+      "Page location as restriction: NO"
+    );
+
+    console.log(
+      "======================================"
     );
   }
 );
